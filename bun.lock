@@ -4,14 +4,14 @@
     "": {
       "name": "crow-idl",
       "dependencies": {
-        "@freik/typechk": "latest",
+        "@freik/typechk": "^0.8.4",
       },
       "devDependencies": {
-        "@freik/workspace": "latest",
-        "@types/bun": "latest",
-        "prettier": "latest",
-        "prettier-plugin-organize-imports": "latest",
-        "typescript": "latest",
+        "@freik/workspace": "^0.6.5",
+        "@types/bun": "^1.2.18",
+        "prettier": "^3.6.2",
+        "prettier-plugin-organize-imports": "^4.1.0",
+        "typescript": "^5.8.3",
       },
       "peerDependencies": {
         "typescript": "^5",

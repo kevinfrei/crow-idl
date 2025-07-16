@@ -53,18 +53,29 @@ async function emitCode(
   if (await file.exists()) {
     await file.delete();
   }
-  const writer = file.writer();
-  await emitter.header(writer);
+  const body: string[] = [];
   for (const [name, item] of Object.entries(items)) {
     // Emit the C++ code for each SharedConstants item, either numeric or string type
     const itemEmitter = forElement(emitter, item);
-    await itemEmitter(writer, name, item);
+    body.push(...itemEmitter(name, item));
   }
-  await emitter.footer(writer);
+  const header = emitter.generateHeader();
+  const footer = emitter.generateFooter();
+  const writer = file.writer();
+  await writer.write(header.join('\n') + '\n');
+  await writer.write(body.join('\n') + '\n');
+  await writer.write(footer.join('\n') + '\n');
   await writer.end();
 }
 
 export function MakeGenerator(emitter: Emitter): FileGenerator {
-  return async (fileName: string, items: Record<string, Types>) =>
-    await emitCode(emitter, fileName, items);
+  return async (
+    input: string,
+    output: string,
+    items: Record<string, Types>,
+  ) => {
+    emitter.setOutputFilename(output);
+    emitter.setInputFilename(input);
+    await emitCode(emitter, output, items);
+  };
 }

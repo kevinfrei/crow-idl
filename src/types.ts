@@ -86,15 +86,14 @@ export type NamedTypes = ObjType | SubType | EnumType;
 export type Types = Anonymous | NamedTypes | I;
 export type SymbolList = Record<string, Types>;
 
-export type EmitItem<T> = (
-  writer: Bun.FileSink,
-  name: string,
-  item: T,
-) => Promise<void>;
+export type EmitItem<T> = (name: string, item: T) => string[];
 
 export type Emitter = {
-  header: (writer: Bun.FileSink) => Promise<void>;
-  footer: (writer: Bun.FileSink) => Promise<void>;
+  setInputFilename: (fileName: string) => void;
+  setOutputFilename: (fileName: string) => void;
+  setAdditionalOptions: (opts: Record<string, string>) => void;
+  generateHeader: () => string[];
+  generateFooter: () => string[];
   types: {
     objType: EmitItem<ObjType>;
     subType: EmitItem<SubType>;
@@ -112,6 +111,7 @@ export type Emitter = {
 };
 
 export type FileGenerator = (
-  fileName: string,
+  inputFileName: string,
+  outputFileName: string,
   items: Record<string, Types>,
-) => Promise<void>;
+) => void;

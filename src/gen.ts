@@ -33,6 +33,10 @@ async function main(input: string, ...args: string[]): Promise<void> {
   let tsFile: string | undefined;
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
+    if (!isString(arg)) {
+      err(`Argument ${i} is not a string: ${arg}`);
+      process.exit(1);
+    }
     if (arg.startsWith('--cpp:')) {
       cppFile = arg.substring(6);
     } else if (arg.startsWith('--ts:')) {
@@ -59,17 +63,18 @@ async function main(input: string, ...args: string[]): Promise<void> {
   if (cppFile) {
     // Generate C++ code
     const CppGen = GetCppGenerator();
-    await CppGen(cppFile, ttg);
+    await CppGen(input, cppFile, ttg);
   }
   if (tsFile) {
     // Generate TypeScript code
     const TypescriptGen = GetTypescriptGenerator();
-    await TypescriptGen(tsFile, ttg);
+    await TypescriptGen(input, tsFile, ttg);
   }
 }
 
-console.log(`Generating C++ code to ${process.argv[2]}, ${process.argv[3]}...`);
-main(process.argv[2], ...process.argv.slice(3)).catch((err) => {
+const args = process.argv.slice(3);
+console.log(`Generating code from ${process.argv[2]} (${args.join(' ')})`);
+main(process.argv[2]!, ...args).catch((err) => {
   console.error('Error generating interface code:', err);
   process.exit(2);
 });
