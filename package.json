@@ -11,7 +11,16 @@
   "types": "src/types.ts",
   "bin": "src/gen.ts",
   "scripts": {
-    "format": "tools format bun"
+    "prepare": "husky",
+    "format": "tools format bun",
+    "dcfg": "cmake --preset debug",
+    "rcfg": "cmake --preset release",
+    "dcpp": "cmake --build build/Debug",
+    "rcpp": "cmake --build build/Release",
+    "typechk": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "**": "I need to add actual tests here",
+    "test": "bun run typechk"
   },
   "dependencies": {
     "@freik/typechk": "^0.8.4"
@@ -22,6 +31,8 @@
   "devDependencies": {
     "@freik/workspace": "^0.6.5",
     "@types/bun": "^1.2.18",
+    "clang-format": "^1.8.0",
+    "husky": "^9.1.7",
     "prettier": "^3.6.2",
     "prettier-plugin-organize-imports": "^4.1.0",
     "typescript": "^5.8.3"
