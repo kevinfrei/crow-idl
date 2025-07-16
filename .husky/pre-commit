@@ -1,2 +1,2 @@
-bun run format
-bun run test
+bun run hook-commit
+

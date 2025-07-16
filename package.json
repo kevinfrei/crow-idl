@@ -20,7 +20,9 @@
     "typechk": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
     "**": "I need to add actual tests here",
-    "test": "bun run typechk"
+    "test": "bun run typechk",
+    "hook-commit": "bun run format",
+    "hook-push": "bun run test"
   },
   "dependencies": {
     "@freik/typechk": "^0.8.4"
