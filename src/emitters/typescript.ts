@@ -137,15 +137,15 @@ function getTypeName(type: Types, optUndef?: boolean): string {
   } else if (isArrayType(type)) {
     return `${getTypeName(type.d, true)}[]`;
   } else if (isSetType(type) || isFastSetType(type)) {
-    return `Set<${getTypeName(type.d)}>`;
+    return `Set<${getTypeName(type.d, true)}>`;
   } else if (isMapType(type) || isFastMapType(type)) {
-    return `Map<${getTypeName(type.k)}, ${getTypeName(type.v)}>`;
+    return `Map<${getTypeName(type.k, true)}, ${getTypeName(type.v, true)}>`;
   } else if (isTupleType(type)) {
     return `[${type.l.map((t) => getTypeName(t, true)).join(', ')}]`;
   } else if (isOptionalType(type)) {
     return optUndef
-      ? `(${getTypeName(type.d)} | undefined)`
-      : getTypeName(type.d);
+      ? `(${getTypeName(type.d, false)} | undefined)`
+      : getTypeName(type.d, false);
   }
   throw new Error(`Unsupported unnamed type: ${JSON.stringify(type)}`);
 }
@@ -182,7 +182,7 @@ function getTypeCheckName(type: Types): string {
   } else if (isArrayType(type)) {
     return `TC.chkArrayOf(${getTypeCheckName(type.d)})`;
   } else if (isSetType(type) || isFastSetType(type)) {
-    return `TC.chkSetOf(${getTypeName(type.d)})`;
+    return `TC.chkSetOf(${getTypeCheckName(type.d)})`;
   } else if (isMapType(type) || isFastMapType(type)) {
     return `TC.chkMapOf(${getTypeCheckName(type.k)}, ${getTypeCheckName(type.v)})`;
   } else if (isTupleType(type)) {
