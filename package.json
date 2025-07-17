@@ -19,8 +19,10 @@
     "rcpp": "cmake --build build/Release",
     "typechk": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "**": "I need to add actual tests here",
-    "test": "bun run typechk",
+    "justtest": "bun test",
+    "watch": "bun test --watch",
+    "test": "bun run typechk && bun run justtest",
+    "*": "Hooks for Husky",
     "hook-commit": "bun run format",
     "hook-push": "bun run test"
   },

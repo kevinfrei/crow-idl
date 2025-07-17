@@ -114,4 +114,15 @@ export type FileGenerator = (
   inputFileName: string,
   outputFileName: string,
   items: Record<string, Types>,
-) => void;
+) => Promise<void>;
+
+export type CodeGenerator = (
+  inputFileName: string,
+  outputFileName: string,
+  items: Record<string, Types>,
+) => string[];
+
+export type IdlGenerator = {
+  code: CodeGenerator;
+  file: FileGenerator;
+};

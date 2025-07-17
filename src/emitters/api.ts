@@ -12,7 +12,14 @@ import {
   isSubType,
   isTupleType,
 } from '../IDL';
-import type { EmitItem, Emitter, FileGenerator, Types } from '../types';
+import type {
+  CodeGenerator,
+  EmitItem,
+  Emitter,
+  FileGenerator,
+  IdlGenerator,
+  Types,
+} from '../types';
 
 function forElement(emit: Emitter, adt: Types): EmitItem<any> {
   // Returns the type emitter for the given ADT
@@ -44,15 +51,11 @@ function forElement(emit: Emitter, adt: Types): EmitItem<any> {
   throw new Error(`Unknown ADT type: ${adt}`);
 }
 
-async function emitCode(
+function generateCode(
   emitter: Emitter,
   fileName: string,
   items: Record<string, Types>,
-): Promise<void> {
-  const file = Bun.file(fileName);
-  if (await file.exists()) {
-    await file.delete();
-  }
+): string[] {
   const body: string[] = [];
   for (const [name, item] of Object.entries(items)) {
     // Emit the C++ code for each SharedConstants item, either numeric or string type
@@ -61,21 +64,36 @@ async function emitCode(
   }
   const header = emitter.generateHeader();
   const footer = emitter.generateFooter();
-  const writer = file.writer();
-  await writer.write(header.join('\n') + '\n');
-  await writer.write(body.join('\n') + '\n');
-  await writer.write(footer.join('\n') + '\n');
-  await writer.end();
+  return [...header, ...body, ...footer];
 }
 
-export function MakeGenerator(emitter: Emitter): FileGenerator {
-  return async (
+async function emitCode(
+  emitter: Emitter,
+  fileName: string,
+  items: Record<string, Types>,
+): Promise<void> {
+  const code = generateCode(emitter, fileName, items);
+  await Bun.write(fileName, code.join('\n'));
+}
+
+export function MakeGenerator(emitter: Emitter): IdlGenerator {
+  const file: FileGenerator = async (
     input: string,
     output: string,
     items: Record<string, Types>,
-  ) => {
+  ): Promise<void> => {
     emitter.setOutputFilename(output);
     emitter.setInputFilename(input);
-    await emitCode(emitter, output, items);
+    return emitCode(emitter, output, items);
   };
+  const code: CodeGenerator = (
+    input: string,
+    output: string,
+    items: Record<string, Types>,
+  ): string[] => {
+    emitter.setOutputFilename(output);
+    emitter.setInputFilename(input);
+    return generateCode(emitter, output, items);
+  };
+  return { code, file };
 }

@@ -63,15 +63,19 @@ async function main(input: string, ...args: string[]): Promise<void> {
   if (cppFile) {
     // Generate C++ code
     const CppGen = GetCppGenerator();
-    await CppGen(input, cppFile, ttg);
+    await CppGen.file(input, cppFile, ttg);
   }
   if (tsFile) {
     // Generate TypeScript code
     const TypescriptGen = GetTypescriptGenerator();
-    await TypescriptGen(input, tsFile, ttg);
+    await TypescriptGen.file(input, tsFile, ttg);
   }
 }
 
+if (process.argv.length < 4) {
+  err('Invalid command line');
+  process.exit(1);
+}
 const args = process.argv.slice(3);
 console.log(`Generating code from ${process.argv[2]} (${args.join(' ')})`);
 main(process.argv[2]!, ...args).catch((err) => {
