@@ -18,6 +18,7 @@
     "rcpp": "cmake --build build/Release",
     "typechk": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
+    "lint": "eslint --ext .ts src --fix",
     "justtest": "bun test",
     "watch": "bun test --watch",
     "test": "bun run typechk && bun run justtest",

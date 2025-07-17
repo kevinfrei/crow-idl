@@ -50,13 +50,13 @@ function forElement<T extends Types>(emit: Emitter, adt: T): EmitItem<T> {
     return emit.types.strType as EmitItem<T>;
   } else if (isOptionalType(adt)) {
     return emit.types.optType as EmitItem<T>;
+  } else {
+    return emit.types.simpleType as EmitItem<T>;
   }
-  throw new Error(`Unknown ADT type: ${adt}`);
 }
 
 function generateCode(
   emitter: Emitter,
-  fileName: string,
   items: Record<string, Types>,
 ): string[] {
   const body: string[] = [];
@@ -75,28 +75,31 @@ async function emitCode(
   fileName: string,
   items: Record<string, Types>,
 ): Promise<void> {
-  const code = generateCode(emitter, fileName, items);
+  const code = generateCode(emitter, items);
   await Bun.write(fileName, code.join('\n'));
 }
 
 export function MakeGenerator(emitter: Emitter): IdlGenerator {
   const file: FileGenerator = async (
-    input: string,
-    output: string,
+    inputFileName: string,
+    outputFileName: string,
     items: Record<string, Types>,
   ): Promise<void> => {
-    emitter.setOutputFilename(output);
-    emitter.setInputFilename(input);
-    return emitCode(emitter, output, items);
+    emitter.setOutputFilename(outputFileName);
+    emitter.setInputFilename(inputFileName);
+    return emitCode(emitter, outputFileName, items);
   };
   const code: CodeGenerator = (
-    input: string,
-    output: string,
+    inputFileName: string,
+    outputFileName: string,
     items: Record<string, Types>,
   ): string[] => {
-    emitter.setOutputFilename(output);
-    emitter.setInputFilename(input);
-    return generateCode(emitter, output, items);
+    emitter.setOutputFilename(outputFileName);
+    emitter.setInputFilename(inputFileName);
+    const code = generateCode(emitter, items);
+    // Split all the results, and turn them into a single array
+    // of strings, which is the code to be generated
+    return code.map((line) => line.split('\n')).flat();
   };
   return { code, file };
 }

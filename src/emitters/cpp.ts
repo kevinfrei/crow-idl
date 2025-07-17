@@ -25,7 +25,6 @@ import {
 import type {
   Emitter,
   Enum,
-  FileGenerator,
   IdlGenerator,
   NEnum,
   ObjType,
@@ -229,7 +228,7 @@ inline constexpr std::string_view to_string(${name} _value) {
   switch (_value) {
 ${Object.entries(item.v)
   .map(
-    ([key, _]) => `    case ${name}::${key}:
+    ([key]) => `    case ${name}::${key}:
       return "${key}";`,
   )
   .join('\n')}
@@ -322,10 +321,8 @@ function objType(name: string, item: ObjType): string[] {
     res.push(`  ${typeName} ${key};`);
   }
   res.push('};');
-  const required = Object.entries(item.d).filter(
-    ([_, v]) => !isOptionalType(v),
-  );
-  const optional = Object.entries(item.d).filter(([_, v]) => isOptionalType(v));
+  const required = Object.entries(item.d).filter(([, v]) => !isOptionalType(v));
+  const optional = Object.entries(item.d).filter(([, v]) => isOptionalType(v));
   addNonNamespace(`
 #pragma region JSON serialization for object ${name}
 template <> 
@@ -334,11 +331,11 @@ struct impl_to_json<${namespace}::${name}> {
       const ${namespace}::${name}& _value) {
     crow::json::wvalue _res;
     ${required
-      .map(([key, _]) => `_res["${key}"] = to_json(_value.${key});`)
+      .map(([key]) => `_res["${key}"] = to_json(_value.${key});`)
       .join('\n    ')}
     ${optional
       .map(
-        ([key, _]) => `if (_value.${key}) {
+        ([key]) => `if (_value.${key}) {
        _res["${key}"] = to_json(*_value.${key});
       }`,
       )
@@ -431,7 +428,7 @@ from_json<${namespace}::${name}>(
   ${namespace}::${name} _res{std::move(*_base), ${
     // std::move the fields of the base, plus the inherited fields
     Object.entries(item.d)
-      .map(([key, value]) => `std::move(*_${key}_opt_)`)
+      .map(([key]) => `std::move(*_${key}_opt_)`)
       .join(', ')
   }};
 
@@ -459,6 +456,7 @@ export const CppEmitter: Emitter = {
     enumType,
     numEnumType,
     strEnumType,
+    simpleType: usingType,
     optType: usingType,
     arrType: usingType,
     setType: usingType,
