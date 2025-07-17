@@ -383,7 +383,7 @@ from_json<${namespace}::${name}>(
 }
 
 function subType(name: string, item: SubType): string[] {
-  const res = ['', `struct ${name} : ${item.p} {`, ''];
+  const res = ['', `struct ${name} : public ${item.p} {`, ''];
   for (const [key, value] of Object.entries(item.d)) {
     const typeName = getTypeName(value);
     res.push(`  ${typeName} ${key};`);
