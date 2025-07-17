@@ -442,7 +442,8 @@ from_json<${namespace}::${name}>(
   return res;
 }
 function usingType(name: string, item: Types): string[] {
-  // This is a base type, so we don't need to do anything special
+  // This is a base/simple type, so we don't need to do anything special,
+  // just a simple using statement:
   return [`using ${name} = ${getTypeName(item)};`];
 }
 
@@ -455,16 +456,17 @@ export const CppEmitter: Emitter = {
   types: {
     objType,
     subType,
+    enumType,
+    numEnumType,
+    strEnumType,
+    optType: usingType,
     arrType: usingType,
     setType: usingType,
     fastSetType: usingType,
     mapType: usingType,
     fastMapType: usingType,
     tupType: usingType,
-    enumType,
     strType: usingType,
-    numEnumType,
-    strEnumType,
   },
 };
 

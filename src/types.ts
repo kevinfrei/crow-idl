@@ -96,6 +96,7 @@ export type Emitter = {
   generateFooter: () => string[];
   types: {
     objType: EmitItem<ObjType>;
+    optType: EmitItem<OptType>;
     subType: EmitItem<SubType>;
     arrType: EmitItem<ArrType>;
     setType: EmitItem<SetType>;

@@ -5,6 +5,7 @@ import {
   isMapType,
   isNumericEnumType,
   isObjectType,
+  isOptionalType,
   isPlainEnumType,
   isSetType,
   isStringEnumType,
@@ -47,6 +48,8 @@ function forElement(emit: Emitter, adt: Types): EmitItem<any> {
     return emit.types.strEnumType;
   } else if (isStringType(adt)) {
     return emit.types.strType;
+  } else if (isOptionalType(adt)) {
+    return emit.types.optType;
   }
   throw new Error(`Unknown ADT type: ${adt}`);
 }

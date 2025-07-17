@@ -11,7 +11,6 @@
   "types": "src/types.ts",
   "bin": "src/gen.ts",
   "scripts": {
-    "prepare": "husky",
     "format": "tools format bun",
     "dcfg": "cmake --preset debug",
     "rcfg": "cmake --preset release",
@@ -23,6 +22,7 @@
     "watch": "bun test --watch",
     "test": "bun run typechk && bun run justtest",
     "*": "Hooks for Husky",
+    "prepare": "husky",
     "hook-commit": "bun run format",
     "hook-push": "bun run test"
   },
