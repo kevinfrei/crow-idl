@@ -96,57 +96,57 @@ export const enum_num = (u: Int | I, v: Of<number>): NEnum => ({
 export const enum_str = (v: Of<string>): SEnum => ({ t: TypeId.SEnum, v });
 
 // Type guards for the IDL types
-export function isStringType(x: any): x is Str {
+export function isStringType(x: unknown): x is Str {
   return x === TypeId.Str;
 }
-export function isCharType(x: any): x is Char {
+export function isCharType(x: unknown): x is Char {
   return x === TypeId.Char;
 }
-export function isU8Type(x: any): x is U8 {
+export function isU8Type(x: unknown): x is U8 {
   return x === TypeId.U8;
 }
-export function isI8Type(x: any): x is I8 {
+export function isI8Type(x: unknown): x is I8 {
   return x === TypeId.I8;
 }
-export function isU16Type(x: any): x is U16 {
+export function isU16Type(x: unknown): x is U16 {
   return x === TypeId.U16;
 }
-export function isI16Type(x: any): x is I16 {
+export function isI16Type(x: unknown): x is I16 {
   return x === TypeId.I16;
 }
-export function isU32Type(x: any): x is U32 {
+export function isU32Type(x: unknown): x is U32 {
   return x === TypeId.U32;
 }
-export function isI32Type(x: any): x is I32 {
+export function isI32Type(x: unknown): x is I32 {
   return x === TypeId.I32;
 }
-export function isU64Type(x: any): x is U64 {
+export function isU64Type(x: unknown): x is U64 {
   return x === TypeId.U64;
 }
-export function isI64Type(x: any): x is I64 {
+export function isI64Type(x: unknown): x is I64 {
   return x === TypeId.I64;
 }
-export function isPlainIntEnumType(x: any): x is I {
+export function isPlainIntEnumType(x: unknown): x is I {
   return x === TypeId.I;
 }
-export function isBoolType(x: any): x is Bool {
+export function isBoolType(x: unknown): x is Bool {
   return x === TypeId.Bool;
 }
-export function isFloatType(x: any): x is Flt {
+export function isFloatType(x: unknown): x is Flt {
   return x === TypeId.Flt;
 }
-export function isDoubleType(x: any): x is Dbl {
+export function isDoubleType(x: unknown): x is Dbl {
   return x === TypeId.Dbl;
 }
-export function isSimpleType(x: any): x is Simple {
+export function isSimpleType(x: unknown): x is Simple {
   return isString(x) && x.length === 1 && 'sc01234567bfd'.indexOf(x) >= 0;
 }
 export function isIntegerType(
-  x: any,
+  x: unknown,
 ): x is Int | I8 | I16 | I32 | I64 | U8 | U16 | U32 | U64 {
   return '012345678'.indexOf(x) >= 0;
 }
-export function isRefType(x: any): x is RefType {
+export function isRefType(x: unknown): x is RefType {
   return (
     isObjectNonNull(x) &&
     hasStrField(x, 't') &&
@@ -154,7 +154,7 @@ export function isRefType(x: any): x is RefType {
     hasStrField(x, 'r')
   );
 }
-export function isArrayType(x: any): x is ArrType {
+export function isArrayType(x: unknown): x is ArrType {
   return (
     isObjectNonNull(x) &&
     hasStrField(x, 't') &&
@@ -162,7 +162,7 @@ export function isArrayType(x: any): x is ArrType {
     hasFieldOf(x, 'd', isTypes)
   );
 }
-export function isSetType(x: any): x is SetType {
+export function isSetType(x: unknown): x is SetType {
   return (
     isObjectNonNull(x) &&
     hasStrField(x, 't') &&
@@ -170,7 +170,7 @@ export function isSetType(x: any): x is SetType {
     hasFieldOf(x, 'd', isTypes)
   );
 }
-export function isFastSetType(x: any): x is FastSetType {
+export function isFastSetType(x: unknown): x is FastSetType {
   return (
     isObjectNonNull(x) &&
     hasStrField(x, 't') &&
@@ -178,7 +178,7 @@ export function isFastSetType(x: any): x is FastSetType {
     hasFieldOf(x, 'd', isTypes)
   );
 }
-export function isMapType(x: any): x is MapType {
+export function isMapType(x: unknown): x is MapType {
   return (
     isObjectNonNull(x) &&
     hasStrField(x, 't') &&
@@ -187,7 +187,7 @@ export function isMapType(x: any): x is MapType {
     hasFieldOf(x, 'v', isTypes)
   );
 }
-export function isFastMapType(x: any): x is FastMapType {
+export function isFastMapType(x: unknown): x is FastMapType {
   return (
     isObjectNonNull(x) &&
     hasStrField(x, 't') &&
@@ -196,7 +196,7 @@ export function isFastMapType(x: any): x is FastMapType {
     hasFieldOf(x, 'v', isTypes)
   );
 }
-export function isTupleType(x: any): x is TupType {
+export function isTupleType(x: unknown): x is TupType {
   return (
     isObjectNonNull(x) &&
     hasStrField(x, 't') &&
@@ -204,7 +204,7 @@ export function isTupleType(x: any): x is TupType {
     hasFieldOf(x, 'l', chkArrayOf(isTypes))
   );
 }
-export function isObjectType(x: any): x is ObjType {
+export function isObjectType(x: unknown): x is ObjType {
   return (
     isObjectNonNull(x) &&
     hasStrField(x, 't') &&
@@ -212,7 +212,7 @@ export function isObjectType(x: any): x is ObjType {
     hasFieldOf(x, 'd', chkRecordOf(isString, isAnonymousType))
   );
 }
-export function isOptionalType(x: any): x is OptType {
+export function isOptionalType(x: unknown): x is OptType {
   return (
     isObjectNonNull(x) &&
     hasStrField(x, 't') &&
@@ -220,7 +220,7 @@ export function isOptionalType(x: any): x is OptType {
     hasFieldOf(x, 'd', isTypes)
   );
 }
-export function isSubType(x: any): x is SubType {
+export function isSubType(x: unknown): x is SubType {
   return (
     isObjectNonNull(x) &&
     hasStrField(x, 't') &&
@@ -229,7 +229,7 @@ export function isSubType(x: any): x is SubType {
     hasFieldOf(x, 'd', chkRecordOf(isString, isAnonymousType))
   );
 }
-export function isPlainEnumType(x: any): x is Enum {
+export function isPlainEnumType(x: unknown): x is Enum {
   return (
     isObjectNonNull(x) &&
     hasStrField(x, 't') &&
@@ -238,7 +238,7 @@ export function isPlainEnumType(x: any): x is Enum {
     hasFieldOf(x, 'v', chkArrayOf(isString))
   );
 }
-export function isNumericEnumType(x: any): x is NEnum {
+export function isNumericEnumType(x: unknown): x is NEnum {
   return (
     isObjectNonNull(x) &&
     hasStrField(x, 't') &&
@@ -246,7 +246,7 @@ export function isNumericEnumType(x: any): x is NEnum {
     hasFieldOf(x, 'v', chkRecordOf(isString, isNumber))
   );
 }
-export function isStringEnumType(x: any): x is SEnum {
+export function isStringEnumType(x: unknown): x is SEnum {
   return (
     isObjectNonNull(x) &&
     hasStrField(x, 't') &&
@@ -254,14 +254,14 @@ export function isStringEnumType(x: any): x is SEnum {
     hasFieldOf(x, 'v', chkRecordOf(isString, isString))
   );
 }
-export function isEnumType(x: any): x is EnumType {
+export function isEnumType(x: unknown): x is EnumType {
   return isPlainEnumType(x) || isNumericEnumType(x) || isStringEnumType(x);
 }
-export function isNamedType(x: any): x is ObjType | SubType | EnumType {
+export function isNamedType(x: unknown): x is ObjType | SubType | EnumType {
   return isEnumType(x) || isSubType(x) || isObjectType(x);
 }
 export function isCollectionType(
-  x: any,
+  x: unknown,
 ): x is ArrType | SetType | FastSetType | MapType | FastMapType {
   return (
     isArrayType(x) ||
@@ -271,7 +271,7 @@ export function isCollectionType(
     isFastMapType(x)
   );
 }
-export function isAnonymousType(x: any): x is Anonymous {
+export function isAnonymousType(x: unknown): x is Anonymous {
   return (
     isSimpleType(x) ||
     isRefType(x) ||
@@ -280,7 +280,7 @@ export function isAnonymousType(x: any): x is Anonymous {
     isOptionalType(x)
   );
 }
-export function isTypes(x: any): x is Types {
+export function isTypes(x: unknown): x is Types {
   return isNamedType(x) || isAnonymousType(x);
 }
 

@@ -33,12 +33,16 @@
     "typescript": "^5"
   },
   "devDependencies": {
+    "@eslint/js": "^9.31.0",
     "@freik/workspace": "^0.6.5",
     "@types/bun": "^1.2.18",
     "clang-format": "^1.8.0",
+    "eslint": "^9.31.0",
+    "globals": "^16.3.0",
     "husky": "^9.1.7",
     "prettier": "^3.6.2",
     "prettier-plugin-organize-imports": "^4.1.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.37.0"
   }
 }

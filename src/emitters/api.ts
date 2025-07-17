@@ -22,7 +22,7 @@ import type {
   Types,
 } from '../types';
 
-function forElement(emit: Emitter, adt: Types): EmitItem<any> {
+function forElement(emit: Emitter, adt: Types): EmitItem<unknown> {
   // Returns the type emitter for the given ADT
   if (isObjectType(adt)) {
     return emit.types.objType;
