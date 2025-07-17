@@ -302,6 +302,7 @@ export const TypescriptEmitter: Emitter = {
   types: {
     objType,
     subType,
+    optType: simpleType,
     arrType: simpleType,
     setType: simpleType,
     fastSetType: simpleType,

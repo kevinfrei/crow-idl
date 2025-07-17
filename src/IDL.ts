@@ -144,7 +144,7 @@ export function isSimpleType(x: unknown): x is Simple {
 export function isIntegerType(
   x: unknown,
 ): x is Int | I8 | I16 | I32 | I64 | U8 | U16 | U32 | U64 {
-  return '012345678'.indexOf(x) >= 0;
+  return isString(x) && '012345678'.indexOf(x) >= 0;
 }
 export function isRefType(x: unknown): x is RefType {
   return (
