@@ -34,6 +34,8 @@ import type {
 } from '../types';
 import { MakeGenerator } from './api';
 
+const typeMap: Map<string, Types> = new Map();
+
 function SingleQuoteSafe(str: string): string {
   // Escape single quotes in the string for TypeScript
   return str.replace(/'/g, "\\'");
@@ -43,10 +45,14 @@ let sourceFileName = 'unknown.ts';
 // let outputFileName = 'unknown.ts';
 
 function setInputFilename(fileName: string): void {
+  typeMap.clear();
   sourceFileName = fileName;
 }
 
-function setOutputFilename(): void {} /* (fileName: string): void {
+function setOutputFilename(): void {
+  typeMap.clear();
+}
+/* (fileName: string): void {
    outputFileName = fileName;
 }
 */
@@ -102,8 +108,15 @@ function chkIdlI64(v: unknown): v is number {
   }
   return true; // TODO: Check for a BigInt
 }
-const chkIdlChar: TC.typecheck<string> = (v: unknown): v is string =>
-  TC.isString(v) && v.length === 1;
+function chkIdlFloat(v: unknown): v is number {
+  return TC.isNumber(v) && !Number.isNaN(v) && Number.isFinite(v);
+}
+function chkIdlDouble(v: unknown): v is number {
+  return TC.isNumber(v) && !Number.isNaN(v) && Number.isFinite(v);
+}
+function chkIdlChar(v: unknown): v is string {
+  return TC.isString(v) && v.length === 1;
+}
 function chkOptional<T>(chk: TC.typecheck<T>): TC.typecheck<T | undefined> {
   return (v: unknown): v is T | undefined => v === undefined || chk(v);
 }
@@ -127,7 +140,7 @@ function getTypeName(type: Types, optUndef?: boolean): string {
   ) {
     return 'number';
   } else if (isU64Type(type) || isI64Type(type)) {
-    return 'BigInt';
+    return 'bigint';
   } else if (isStringType(type) || isCharType(type)) {
     return 'string';
   } else if (isBoolType(type)) {
@@ -170,7 +183,7 @@ function getTypeCheckName(type: Types): string {
   } else if (isFloatType(type)) {
     return 'chkIdlFloat';
   } else if (isDoubleType(type)) {
-    return 'TC.isNumber';
+    return 'chkIdlDouble';
   } else if (isStringType(type)) {
     return 'TC.isString';
   } else if (isCharType(type)) {
@@ -186,7 +199,7 @@ function getTypeCheckName(type: Types): string {
   } else if (isMapType(type) || isFastMapType(type)) {
     return `TC.chkMapOf(${getTypeCheckName(type.k)}, ${getTypeCheckName(type.v)})`;
   } else if (isTupleType(type)) {
-    return `TC.chkTuple(${type.l.map(getTypeCheckName).join(', ')})`;
+    return `TC.chkTupleOf(${type.l.map(getTypeCheckName).join(', ')})`;
   } else if (isOptionalType(type)) {
     return `chkOptional(${getTypeCheckName(type.d)})`;
   }
@@ -237,15 +250,13 @@ export function chk${name}(val: unknown): val is ${name} {
 
 function objType(name: string, item: ObjType): string[] {
   const required = Object.entries(item.d)
-    .filter(([, v]) => !isOptionalType(v))
-    .map(([k]) => k);
+    .filter(([k, v]) => !isOptionalType(v))
+    .map(([k, v]) => [k, v]);
   const optional = Object.entries(item.d)
     .filter(([, v]) => isOptionalType(v))
-    .map(([k]) => k);
+    .map(([k, v]) => [k, v]);
   if (required.length + optional.length !== Object.keys(item.d).length) {
-    throw new Error(
-      `Internal error: could not separate required/optional keys for ${name}`,
-    );
+    throw new Error(`Internal error: req/opt keys don't add up for ${name}`);
   }
   const res = ['', `export type ${name} = {`, ''];
   for (const [key, value] of Object.entries(item.d)) {
@@ -255,10 +266,13 @@ function objType(name: string, item: ObjType): string[] {
   res.push(`
 }
 export const chk${name}: TC.typecheck<${name}> = TC.chkObjectOfType({
-${Object.entries(item.d)
-  .map(([key, value]) => `  ${key}: ${getTypeCheckName(value)},`)
+${required
+  .map(([key, value]) => `  ${key}: ${getTypeCheckName(value as Types)},`)
   .join('\n')}
-    });
+    },
+  {${optional
+    .map(([key, value]) => `  ${key}: ${getTypeCheckName(value as Types)},`)
+    .join('\n')}});
 `);
   return res;
 }
@@ -271,11 +285,15 @@ function subType(name: string, item: SubType): string[] {
   }
   res.push(`
 }
-export const chk${name}: TC.typecheck<${name}> = TC.chkObjectOfType({
-${Object.entries(item.d)
-  .map(([key, value]) => `  ${key}: ${getTypeCheckName(value)},`)
-  .join('\n')}
-    });
+export const chk${name}: TC.typecheck<${name}> = TC.chkAllOf(
+  chk${item.p},
+  ${Object.entries(item.d)
+    .map(
+      ([key, value]) =>
+        `  TC.chkFieldOf('${key}', ${getTypeCheckName(value)}),`,
+    )
+    .join('\n')}
+);
 `);
   return res;
 }
