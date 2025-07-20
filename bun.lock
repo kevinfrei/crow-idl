@@ -5,6 +5,8 @@
       "name": "crow-idl",
       "dependencies": {
         "@freik/typechk": "latest",
+        "prettier": "latest",
+        "prettier-plugin-organize-imports": "latest",
       },
       "devDependencies": {
         "@eslint/js": "latest",
@@ -14,8 +16,6 @@
         "eslint": "latest",
         "globals": "latest",
         "husky": "latest",
-        "prettier": "latest",
-        "prettier-plugin-organize-imports": "latest",
         "typescript": "latest",
         "typescript-eslint": "latest",
       },

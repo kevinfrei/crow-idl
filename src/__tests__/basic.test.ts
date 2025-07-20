@@ -99,17 +99,17 @@ function cleanup(str: string[]): string[] {
   return str.map((line) => line.trim()).filter((line) => line.length > 0);
 }
 
-function cleanCode(
+async function cleanCode(
   gen: CodeGenerator,
   outName: string,
   toGen: Record<string, Types>,
-): string[] {
-  return cleanup(gen('inputFile.ts', outName, toGen));
+): Promise<string[]> {
+  return cleanup(await gen('inputFile.ts', outName, toGen));
 }
 
 describe('Typescript codegen expectations', () => {
-  it('Simple types', () => {
-    const deform = cleanCode(
+  it('Simple types', async () => {
+    const deform = await cleanCode(
       GetTypescriptGenerator().code,
       'outputFile.ts',
       simpleTypes,
@@ -130,8 +130,8 @@ describe('Typescript codegen expectations', () => {
     );
     expect(deform.indexOf('export type MyChar = string;')).toBeGreaterThan(0);
   });
-  it('Collection types', () => {
-    const deform = cleanCode(
+  it('Collection types', async () => {
+    const deform = await cleanCode(
       GetTypescriptGenerator().code,
       'outputFile.ts',
       collectionTypes,
@@ -152,8 +152,8 @@ describe('Typescript codegen expectations', () => {
       deform.indexOf('export type StrToU16FastMap = Map<string, number>;'),
     ).toBeGreaterThan(0);
   });
-  it('Aggregate types', () => {
-    const deform = cleanCode(
+  it('Aggregate types', async () => {
+    const deform = await cleanCode(
       GetTypescriptGenerator().code,
       'outputFile.ts',
       aggregateTypes,
@@ -177,8 +177,8 @@ describe('Typescript codegen expectations', () => {
       ),
     ).toBeGreaterThan(0);
   });
-  it('Enumeration types', () => {
-    const deform = cleanCode(
+  it('Enumeration types', async () => {
+    const deform = await cleanCode(
       GetTypescriptGenerator().code,
       'outputFile.ts',
       enumTypes,
@@ -196,7 +196,7 @@ describe('Typescript codegen expectations', () => {
     ).toBeGreaterThan(0);
     expect(
       single.indexOf(
-        'export const MyNEnum = Object.freeze({ a: 1, b: 2, c: 3, })',
+        'export const MyNEnum = Object.freeze({ a: 1, b: 2, c: 3 })',
       ),
     ).toBeGreaterThan(0);
     expect(
@@ -206,7 +206,7 @@ describe('Typescript codegen expectations', () => {
     ).toBeGreaterThan(0);
     expect(
       single.indexOf(
-        "export const MySEnum = Object.freeze({ a: 'apple', b: 'banana', c: 'cherry', })",
+        "export const MySEnum = Object.freeze({ a: 'apple', b: 'banana', c: 'cherry' })",
       ),
     ).toBeGreaterThan(0);
     expect(
@@ -218,8 +218,8 @@ describe('Typescript codegen expectations', () => {
 });
 
 describe('C++ codegen expectations', () => {
-  it('Simple types', () => {
-    const deform = cleanCode(
+  it('Simple types', async () => {
+    const deform = await cleanCode(
       GetCppGenerator().code,
       'outputFile.hpp',
       simpleTypes,
@@ -238,8 +238,8 @@ describe('C++ codegen expectations', () => {
     expect(deform.indexOf('using MyBoolean = bool;')).toBeGreaterThan(0);
     expect(deform.indexOf('using MyChar = char;')).toBeGreaterThan(0);
   });
-  it('Collection types', () => {
-    const deform = cleanCode(
+  it('Collection types', async () => {
+    const deform = await cleanCode(
       GetCppGenerator().code,
       'outputFile.hpp',
       collectionTypes,
@@ -264,8 +264,8 @@ describe('C++ codegen expectations', () => {
       ),
     ).toBeGreaterThan(0);
   });
-  it('Aggregate types', () => {
-    const deform = cleanCode(
+  it('Aggregate types', async () => {
+    const deform = await cleanCode(
       GetCppGenerator().code,
       'outputFile.hpp',
       aggregateTypes,
@@ -290,8 +290,8 @@ describe('C++ codegen expectations', () => {
       single.indexOf('using MyOpt = std::optional<MySub>;'),
     ).toBeGreaterThan(0);
   });
-  it('Enumeration types', () => {
-    const deform = cleanCode(
+  it('Enumeration types', async () => {
+    const deform = await cleanCode(
       GetCppGenerator().code,
       'outputFile.hpp',
       enumTypes,
@@ -322,13 +322,17 @@ test('IDL API consistency', async () => {
   await GetTypescriptGenerator().file('inputFile.ts', tsOutFileName, types);
   await GetCppGenerator().file('inputFile.ts', cppOutFileName, types);
   // Read the contents of the generated files
-  const tsCode = cleanup((await Bun.file(tsOutFileName).text()).split('\n'));
-  const cppCode = cleanup((await Bun.file(cppOutFileName).text()).split('\n'));
+  const tsCode = await cleanup(
+    (await Bun.file(tsOutFileName).text()).split('\n'),
+  );
+  const cppCode = await cleanup(
+    (await Bun.file(cppOutFileName).text()).split('\n'),
+  );
   const tsFlattenedFile = cleanup(
-    cleanCode(GetTypescriptGenerator().code, tsOutFileName, types),
+    await cleanCode(GetTypescriptGenerator().code, tsOutFileName, types),
   );
   const cppFlattenedFile = cleanup(
-    cleanCode(GetCppGenerator().code, cppOutFileName, types),
+    await cleanCode(GetCppGenerator().code, cppOutFileName, types),
   );
   expect(tsCode.join('@')).toEqual(tsFlattenedFile.join('@'));
   // This one doesn't work yet. Need to diagnose why.
