@@ -74,7 +74,7 @@ import * as TC from '@freik/typechk';
 const chkIdlU8 = (v: unknown): v is number =>
   TC.isNumber(v) && v >= 0 && v <= 255 && Number.isInteger(v);
 const chkIdlI8 = (v: unknown): v is number =>
-  TC.isNumber(v) && v >= -256 && v <= 255 && Number.isInteger(v);
+  TC.isNumber(v) && v >= -128 && v <= 127 && Number.isInteger(v);
 const chkIdlU16 = (v: unknown): v is number =>
   TC.isNumber(v) && v >= 0 && v <= 65535 && Number.isInteger(v);
 const chkIdlI16 = (v: unknown): v is number =>
@@ -99,7 +99,7 @@ function chkIdlI64(v: unknown): v is number {
   return TC.isBigInt(v) && BigInt.asIntN(64, v) === v;
 }
 function chkIdlFloat(v: unknown): v is number {
-  return TC.isNumber(v) && !Number.isNaN(v) && Number.isFinite(v);
+  return TC.isNumber(v) && !Number.isNaN(v) && Number.isFinite(Math.fround(v)) && (v === 0 || Math.fround(v) !== 0);
 }
 function chkIdlDouble(v: unknown): v is number {
   return TC.isNumber(v) && !Number.isNaN(v) && Number.isFinite(v);
