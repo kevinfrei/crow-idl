@@ -110,19 +110,20 @@ export type Emitter = {
     numEnumType: EmitItem<NEnum>;
     strEnumType: EmitItem<SEnum>;
   };
+  postProcess?: (code: string[]) => PromiseLike<string[]>;
 };
 
 export type FileGenerator = (
   inputFileName: string,
   outputFileName: string,
   items: Record<string, Types>,
-) => Promise<void>;
+) => PromiseLike<void>;
 
 export type CodeGenerator = (
   inputFileName: string,
   outputFileName: string,
   items: Record<string, Types>,
-) => string[];
+) => PromiseLike<string[]>;
 
 export type IdlGenerator = {
   code: CodeGenerator;

@@ -1,3 +1,4 @@
+import * as prettier from 'prettier';
 import {
   isAnonymousType,
   isArrayType,
@@ -34,6 +35,8 @@ import type {
 } from '../types';
 import { MakeGenerator } from './api';
 
+const typeMap: Map<string, Types> = new Map();
+
 function SingleQuoteSafe(str: string): string {
   // Escape single quotes in the string for TypeScript
   return str.replace(/'/g, "\\'");
@@ -43,10 +46,14 @@ let sourceFileName = 'unknown.ts';
 // let outputFileName = 'unknown.ts';
 
 function setInputFilename(fileName: string): void {
+  typeMap.clear();
   sourceFileName = fileName;
 }
 
-function setOutputFilename(): void {} /* (fileName: string): void {
+function setOutputFilename(): void {
+  typeMap.clear();
+}
+/* (fileName: string): void {
    outputFileName = fileName;
 }
 */
@@ -67,7 +74,7 @@ import * as TC from '@freik/typechk';
 const chkIdlU8 = (v: unknown): v is number =>
   TC.isNumber(v) && v >= 0 && v <= 255 && Number.isInteger(v);
 const chkIdlI8 = (v: unknown): v is number =>
-  TC.isNumber(v) && v >= -256 && v <= 255 && Number.isInteger(v);
+  TC.isNumber(v) && v >= -128 && v <= 127 && Number.isInteger(v);
 const chkIdlU16 = (v: unknown): v is number =>
   TC.isNumber(v) && v >= 0 && v <= 65535 && Number.isInteger(v);
 const chkIdlI16 = (v: unknown): v is number =>
@@ -80,30 +87,26 @@ const chkIdlI32 = (v: unknown): v is number =>
   v <= 2147483647 &&
   Number.isInteger(v);
 function chkIdlU64(v: unknown): v is number {
-  if (chkIdlU32(v)) {
-    return true;
+  if (TC.isNumber(v)) {
+   return Number.isInteger(v) && chkIdlU64(BigInt(v));
   }
-  if (TC.isNumber(v) && Number.isInteger(v) && v >= 0 && v < 2 << 54) {
-    return true;
-  }
-  return true; // TODO: Check for a BigInt
+  return TC.isBigInt(v) && BigInt.asUintN(64, v) === v;
 }
 function chkIdlI64(v: unknown): v is number {
-  if (chkIdlI32(v)) {
-    return true;
+  if (TC.isNumber(v)) {
+   return Number.isInteger(v) && chkIdlI64(BigInt(v));
   }
-  if (
-    TC.isNumber(v) &&
-    Number.isInteger(v) &&
-    v >= -(2 << 53) &&
-    v < 2 << 53
-  ) {
-    return true;
-  }
-  return true; // TODO: Check for a BigInt
+  return TC.isBigInt(v) && BigInt.asIntN(64, v) === v;
 }
-const chkIdlChar: TC.typecheck<string> = (v: unknown): v is string =>
-  TC.isString(v) && v.length === 1;
+function chkIdlFloat(v: unknown): v is number {
+  return TC.isNumber(v) && !Number.isNaN(v) && Number.isFinite(Math.fround(v)) && (v === 0 || Math.fround(v) !== 0);
+}
+function chkIdlDouble(v: unknown): v is number {
+  return TC.isNumber(v) && !Number.isNaN(v) && Number.isFinite(v);
+}
+function chkIdlChar(v: unknown): v is string {
+  return TC.isString(v) && v.length === 1;
+}
 function chkOptional<T>(chk: TC.typecheck<T>): TC.typecheck<T | undefined> {
   return (v: unknown): v is T | undefined => v === undefined || chk(v);
 }
@@ -127,7 +130,7 @@ function getTypeName(type: Types, optUndef?: boolean): string {
   ) {
     return 'number';
   } else if (isU64Type(type) || isI64Type(type)) {
-    return 'BigInt';
+    return 'bigint';
   } else if (isStringType(type) || isCharType(type)) {
     return 'string';
   } else if (isBoolType(type)) {
@@ -170,7 +173,7 @@ function getTypeCheckName(type: Types): string {
   } else if (isFloatType(type)) {
     return 'chkIdlFloat';
   } else if (isDoubleType(type)) {
-    return 'TC.isNumber';
+    return 'chkIdlDouble';
   } else if (isStringType(type)) {
     return 'TC.isString';
   } else if (isCharType(type)) {
@@ -186,7 +189,7 @@ function getTypeCheckName(type: Types): string {
   } else if (isMapType(type) || isFastMapType(type)) {
     return `TC.chkMapOf(${getTypeCheckName(type.k)}, ${getTypeCheckName(type.v)})`;
   } else if (isTupleType(type)) {
-    return `TC.chkTuple(${type.l.map(getTypeCheckName).join(', ')})`;
+    return `TC.chkTupleOf(${type.l.map(getTypeCheckName).join(', ')})`;
   } else if (isOptionalType(type)) {
     return `chkOptional(${getTypeCheckName(type.d)})`;
   }
@@ -237,15 +240,13 @@ export function chk${name}(val: unknown): val is ${name} {
 
 function objType(name: string, item: ObjType): string[] {
   const required = Object.entries(item.d)
-    .filter(([, v]) => !isOptionalType(v))
-    .map(([k]) => k);
+    .filter(([k, v]) => !isOptionalType(v))
+    .map(([k, v]) => [k, v]);
   const optional = Object.entries(item.d)
     .filter(([, v]) => isOptionalType(v))
-    .map(([k]) => k);
+    .map(([k, v]) => [k, v]);
   if (required.length + optional.length !== Object.keys(item.d).length) {
-    throw new Error(
-      `Internal error: could not separate required/optional keys for ${name}`,
-    );
+    throw new Error(`Internal error: req/opt keys don't add up for ${name}`);
   }
   const res = ['', `export type ${name} = {`, ''];
   for (const [key, value] of Object.entries(item.d)) {
@@ -255,10 +256,13 @@ function objType(name: string, item: ObjType): string[] {
   res.push(`
 }
 export const chk${name}: TC.typecheck<${name}> = TC.chkObjectOfType({
-${Object.entries(item.d)
-  .map(([key, value]) => `  ${key}: ${getTypeCheckName(value)},`)
+${required
+  .map(([key, value]) => `  ${key}: ${getTypeCheckName(value as Types)},`)
   .join('\n')}
-    });
+    },
+  {${optional
+    .map(([key, value]) => `  ${key}: ${getTypeCheckName(value as Types)},`)
+    .join('\n')}});
 `);
   return res;
 }
@@ -271,22 +275,46 @@ function subType(name: string, item: SubType): string[] {
   }
   res.push(`
 }
-export const chk${name}: TC.typecheck<${name}> = TC.chkObjectOfType({
-${Object.entries(item.d)
-  .map(([key, value]) => `  ${key}: ${getTypeCheckName(value)},`)
-  .join('\n')}
-    });
+export const chk${name}: TC.typecheck<${name}> = TC.chkAllOf(
+  chk${item.p},
+  ${Object.entries(item.d)
+    .map(
+      ([key, value]) =>
+        `  TC.chkFieldOf('${key}', ${getTypeCheckName(value)}),`,
+    )
+    .join('\n')}
+);
 `);
   return res;
 }
 
 function simpleType(name: string, item: Types): string[] {
   const res = [];
-  res.push(`\nexport type ${name} = ${getTypeName(item, true)};\n`);
+  res.push(`\nexport type ${name} = ${getTypeName(item, true)};`);
   if (isAnonymousType(item)) {
-    res.push(`export const chk${name} = ${getTypeCheckName(item)}\n`);
+    res.push(`export const chk${name} = ${getTypeCheckName(item)};\n`);
   }
   return res;
+}
+
+async function postProcess(code: string[]): Promise<string[]> {
+  // Perform any post-processing on the generated code here
+  const joinedCode = code.join('\n');
+  const formattedCode = await prettier.format(joinedCode, {
+    printWidth: 80,
+    trailingComma: 'none',
+    singleQuote: true,
+    proseWrap: 'always',
+    tabWidth: 2,
+    useTabs: false,
+    bracketSameLine: true,
+    arrowParens: 'always',
+    parser: 'typescript',
+    organizeImports: true,
+    // "organizeImportsSkipDestructiveCodeActions": true,
+    plugins: ['prettier-plugin-organize-imports'],
+  });
+  return formattedCode.split('\n');
 }
 
 export const TypescriptEmitter: Emitter = {
@@ -311,6 +339,7 @@ export const TypescriptEmitter: Emitter = {
     numEnumType,
     strEnumType,
   },
+  postProcess,
 };
 
 export function GetTypescriptGenerator(): IdlGenerator {

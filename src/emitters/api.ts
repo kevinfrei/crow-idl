@@ -55,10 +55,10 @@ function forElement<T extends Types>(emit: Emitter, adt: T): EmitItem<T> {
   }
 }
 
-function generateCode(
+async function generateCode(
   emitter: Emitter,
   items: Record<string, Types>,
-): string[] {
+): Promise<string[]> {
   const body: string[] = [];
   for (const [name, item] of Object.entries(items)) {
     // Emit the C++ code for each SharedConstants item, either numeric or string type
@@ -67,7 +67,11 @@ function generateCode(
   }
   const header = emitter.generateHeader();
   const footer = emitter.generateFooter();
-  return [...header, ...body, ...footer];
+  const res = [...header, ...body, ...footer];
+  if (emitter.postProcess) {
+    return await emitter.postProcess(res);
+  }
+  return res;
 }
 
 async function emitCode(
@@ -75,7 +79,7 @@ async function emitCode(
   fileName: string,
   items: Record<string, Types>,
 ): Promise<void> {
-  const code = generateCode(emitter, items);
+  const code = await generateCode(emitter, items);
   await Bun.write(fileName, code.join('\n'));
 }
 
@@ -89,14 +93,14 @@ export function MakeGenerator(emitter: Emitter): IdlGenerator {
     emitter.setInputFilename(inputFileName);
     return emitCode(emitter, outputFileName, items);
   };
-  const code: CodeGenerator = (
+  const code: CodeGenerator = async (
     inputFileName: string,
     outputFileName: string,
     items: Record<string, Types>,
-  ): string[] => {
+  ): Promise<string[]> => {
     emitter.setOutputFilename(outputFileName);
     emitter.setInputFilename(inputFileName);
-    const code = generateCode(emitter, items);
+    const code = await generateCode(emitter, items);
     // Split all the results, and turn them into a single array
     // of strings, which is the code to be generated
     return code.map((line) => line.split('\n')).flat();
