@@ -240,7 +240,7 @@ export function chk${name}(val: unknown): val is ${name} {
 
 function objType(name: string, item: ObjType): string[] {
   const required = Object.entries(item.d)
-    .filter(([k, v]) => !isOptionalType(v))
+    .filter(([, v]) => !isOptionalType(v))
     .map(([k, v]) => [k, v]);
   const optional = Object.entries(item.d)
     .filter(([, v]) => isOptionalType(v))

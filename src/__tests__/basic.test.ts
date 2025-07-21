@@ -328,12 +328,14 @@ test('IDL API consistency', async () => {
   const cppCode = await cleanup(
     (await Bun.file(cppOutFileName).text()).split('\n'),
   );
+  expect(cppCode).toBeDefined();
   const tsFlattenedFile = cleanup(
     await cleanCode(GetTypescriptGenerator().code, tsOutFileName, types),
   );
   const cppFlattenedFile = cleanup(
     await cleanCode(GetCppGenerator().code, cppOutFileName, types),
   );
+  expect(cppFlattenedFile).toBeDefined();
   expect(tsCode.join('@')).toEqual(tsFlattenedFile.join('@'));
   // This one doesn't work yet. Need to diagnose why.
   // expect(cppCode.join('@')).toEqual(cppFlattenedFile.join('@'));
