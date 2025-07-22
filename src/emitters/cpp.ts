@@ -196,7 +196,7 @@ ${item.v
   }
 }
 #pragma endregion numeric enum ${name}
-    ]
+
 `,
   ];
 }
@@ -315,7 +315,7 @@ struct impl_from_json<${namespace}::${name}> {
 }
 
 function objType(name: string, item: ObjType): string[] {
-  const res = ['', `struct ${name} {`, ''];
+  const res = ['', `struct ${name} {`];
   for (const [key, value] of Object.entries(item.d)) {
     const typeName = getTypeName(value);
     res.push(`  ${typeName} ${key};`);
@@ -383,7 +383,7 @@ from_json<${namespace}::${name}>(
 }
 
 function subType(name: string, item: SubType): string[] {
-  const res = ['', `struct ${name} : public ${item.p} {`, ''];
+  const res = ['', `struct ${name} : public ${item.p} {`];
   for (const [key, value] of Object.entries(item.d)) {
     const typeName = getTypeName(value);
     res.push(`  ${typeName} ${key};`);
