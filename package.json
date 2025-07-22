@@ -2,14 +2,15 @@
   "name": "crow-idl",
   "version": "0.0.1",
   "description": "A simple IDL for use with CrowCpp (C++) and TypeScript",
-  "module": "index.ts",
+  "module": "build/index.js",
   "type": "module",
   "files": [
-    "src",
-    "index.ts"
+    "build"
   ],
-  "types": "src/types.ts",
-  "bin": "src/gen.ts",
+  "types": "build/src/index.d.ts",
+  "bin": {
+    "crow-idl": "build/src/gen.js"
+  },
   "scripts": {
     "format": "tools format bun",
     "dcfg": "cmake --preset debug",
@@ -18,6 +19,7 @@
     "rcpp": "cmake --build build/Release",
     "typechk": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
+    "bld": "bun build --outdir build ./index.ts ./src/gen.ts --minify --external typescript --external prettier --external prettier-plugin-organize-imports",
     "lint": "eslint --ext .ts src --fix",
     "justtest": "bun test",
     "watch": "bun test --watch",
