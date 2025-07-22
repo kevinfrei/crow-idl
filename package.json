@@ -1,6 +1,6 @@
 {
   "name": "crow-idl",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A simple IDL for use with CrowCpp (C++) and TypeScript",
   "module": "build/index.js",
   "type": "module",

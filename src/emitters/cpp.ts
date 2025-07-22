@@ -196,7 +196,7 @@ ${item.v
   }
 }
 #pragma endregion numeric enum ${name}
-    ]
+
 `,
   ];
 }
