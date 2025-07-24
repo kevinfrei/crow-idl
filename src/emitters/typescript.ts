@@ -100,45 +100,93 @@ import * as TC from '@freik/typechk';
 
 // TODO: Only emit the type checks that are needed
 
-${checks.U8 ? `const chkIdlU8 = (v: unknown): v is number =>
-  TC.isNumber(v) && v >= 0 && v <= 255 && Number.isInteger(v);\n` : ''}
-${checks.I8 ? `const chkIdlI8 = (v: unknown): v is number =>
-  TC.isNumber(v) && v >= -128 && v <= 127 && Number.isInteger(v);\n` : ''}
-${checks.U16 ? `const chkIdlU16 = (v: unknown): v is number =>
-  TC.isNumber(v) && v >= 0 && v <= 65535 && Number.isInteger(v);\n` : ''}
-${checks.I16 ? `const chkIdlI16 = (v: unknown): v is number =>
-  TC.isNumber(v) && v >= -32768 && v <= 32767 && Number.isInteger(v);\n` : ''}
-${checks.U32 ? `const chkIdlU32 = (v: unknown): v is number =>
-  TC.isNumber(v) && v >= 0 && v <= 4294967295 && Number.isInteger(v);\n` : ''}
-${checks.I32 ? `const chkIdlI32 = (v: unknown): v is number =>
+${
+  checks.U8
+    ? `const chkIdlU8 = (v: unknown): v is number =>
+  TC.isNumber(v) && v >= 0 && v <= 255 && Number.isInteger(v);\n`
+    : ''
+}
+${
+  checks.I8
+    ? `const chkIdlI8 = (v: unknown): v is number =>
+  TC.isNumber(v) && v >= -128 && v <= 127 && Number.isInteger(v);\n`
+    : ''
+}
+${
+  checks.U16
+    ? `const chkIdlU16 = (v: unknown): v is number =>
+  TC.isNumber(v) && v >= 0 && v <= 65535 && Number.isInteger(v);\n`
+    : ''
+}
+${
+  checks.I16
+    ? `const chkIdlI16 = (v: unknown): v is number =>
+  TC.isNumber(v) && v >= -32768 && v <= 32767 && Number.isInteger(v);\n`
+    : ''
+}
+${
+  checks.U32
+    ? `const chkIdlU32 = (v: unknown): v is number =>
+  TC.isNumber(v) && v >= 0 && v <= 4294967295 && Number.isInteger(v);\n`
+    : ''
+}
+${
+  checks.I32
+    ? `const chkIdlI32 = (v: unknown): v is number =>
   TC.isNumber(v) &&
   v >= -2147483648 &&
   v <= 2147483647 &&
-  Number.isInteger(v);\n` : ''}
-${checks.U64 ? `function chkIdlU64(v: unknown): v is number {
+  Number.isInteger(v);\n`
+    : ''
+}
+${
+  checks.U64
+    ? `function chkIdlU64(v: unknown): v is number {
   if (TC.isNumber(v)) {
    return Number.isInteger(v) && chkIdlU64(BigInt(v));
   }
   return TC.isBigInt(v) && BigInt.asUintN(64, v) === v;
-}\n` : ''}
-${checks.I64 ? `function chkIdlI64(v: unknown): v is number {
+}\n`
+    : ''
+}
+${
+  checks.I64
+    ? `function chkIdlI64(v: unknown): v is number {
   if (TC.isNumber(v)) {
    return Number.isInteger(v) && chkIdlI64(BigInt(v));
   }
   return TC.isBigInt(v) && BigInt.asIntN(64, v) === v;
-}\n` : ''}
-${checks.Float ? `function chkIdlFloat(v: unknown): v is number {
+}\n`
+    : ''
+}
+${
+  checks.Float
+    ? `function chkIdlFloat(v: unknown): v is number {
   return TC.isNumber(v) && !Number.isNaN(v) && Number.isFinite(Math.fround(v)) && (v === 0 || Math.fround(v) !== 0);
-}\n` : ''}
-${checks.Double ? `function chkIdlDouble(v: unknown): v is number {
+}\n`
+    : ''
+}
+${
+  checks.Double
+    ? `function chkIdlDouble(v: unknown): v is number {
   return TC.isNumber(v) && !Number.isNaN(v) && Number.isFinite(v);
-}\n` : ''}
-${checks.Char ? `function chkIdlChar(v: unknown): v is string {
+}\n`
+    : ''
+}
+${
+  checks.Char
+    ? `function chkIdlChar(v: unknown): v is string {
   return TC.isString(v) && v.length === 1;
-}\n` : ''}
-${checks.Optional ? `function chkOptional<T>(chk: TC.typecheck<T>): TC.typecheck<T | undefined> {
+}\n`
+    : ''
+}
+${
+  checks.Optional
+    ? `function chkOptional<T>(chk: TC.typecheck<T>): TC.typecheck<T | undefined> {
   return (v: unknown): v is T | undefined => v === undefined || chk(v);
-}\n` : ''}
+}\n`
+    : ''
+}
 `.split('\n');
 }
 

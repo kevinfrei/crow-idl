@@ -98,15 +98,13 @@ function generateHeader(): string[] {
 #define ${guardName}
 
 #include <cstdint>
-${headers.map ? '#include <map>\n' : ''}
-#include <optional>
-${headers.set ? '#include <set>\n' : ''}
-#include <string_view>
-${headers.tuple ? '#include <tuple>\n' : ''}
-${headers.fastMap ? '#include <unordered_map>\n' : ''}
-${headers.fastSet ? '#include <unordered_set>\n' : ''}
-${headers.utility ? '#include <utility>\n' : ''}
-${headers.vector ? '#include <vector>\n' : ''}
+${headers.map ? '#include <map>\n' : ''}#include <optional>
+${headers.set ? '#include <set>\n' : ''}#include <string_view>
+${headers.tuple ? '#include <tuple>\n' : ''}${
+    headers.fastMap ? '#include <unordered_map>\n' : ''
+  }${headers.fastSet ? '#include <unordered_set>\n' : ''}${
+    headers.utility ? '#include <utility>\n' : ''
+  }${headers.vector ? '#include <vector>\n' : ''}
 
 #include <crow/json.h>
  
