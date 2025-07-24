@@ -1,6 +1,6 @@
 {
   "name": "crow-idl",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A simple IDL for use with CrowCpp (C++) and TypeScript",
   "module": "build/index.js",
   "type": "module",
@@ -13,6 +13,7 @@
   },
   "scripts": {
     "format": "tools format bun",
+    "clean": "rm -rf build && git restore build/NOTE.md",
     "dcfg": "cmake --preset debug",
     "rcfg": "cmake --preset release",
     "dcpp": "cmake --build build/Debug",
