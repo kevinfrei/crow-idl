@@ -1,3 +1,4 @@
+#!/usr/bin/env bun
 import { chkRecordOf, isString } from '@freik/typechk';
 import { isTypes } from './IDL';
 import { GetCppGenerator } from './emitters/cpp';
