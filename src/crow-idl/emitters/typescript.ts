@@ -226,7 +226,7 @@ function getTypeName(type: Types, optUndef?: boolean): string {
     return optUndef
       ? `(${getTypeName(type.d, false)} | undefined)`
       : getTypeName(type.d, false);
-  }
+  } /* istanbul ignore next */
   throw new Error(`Unsupported unnamed type: ${JSON.stringify(type)}`);
 }
 
