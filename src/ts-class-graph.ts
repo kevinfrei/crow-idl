@@ -108,17 +108,85 @@ classDiagram
     SearchResults : string[] artists
 */
 
-type NamedType = { name: string; type: string };
+type FuncProp = { name: string; args: string; result: string };
+type DataProp = { name: string; type: string };
+type Property = FuncProp | DataProp;
+
 interface NodeInfo {
   name: string;
   kind: 'interface' | 'type';
   extends: string[];
-  props: NamedType[];
+  props: Property[];
+}
+
+function cleanParams(params: string): string {
+  // This is a very naive implementation and won't handle nested *anything* correctly.
+  return params.replaceAll(/:[^,]+([),])/g, '$1');
+}
+
+function deImport(typeStr: string): string {
+  // This is a very naive implementation and won't handle nested *anything* correctly.
+  return typeStr.replaceAll(/import\("[^"]*"\)\./g, '');
+}
+
+function unPromise(typeStr: string): string {
+  if (typeStr.startsWith('Promise<') && typeStr.endsWith('>')) {
+    return typeStr.slice(8, -1);
+  }
+  return typeStr;
+}
+
+function deGeneric(typeStr: string): string {
+  return unPromise(typeStr).replaceAll('<', '~').replaceAll('>', '~');
+}
+
+function cleanType(typeStr: string): string {
+  return deGeneric(deImport(typeStr));
+}
+
+function unVoid(typeStr: string): string {
+  typeStr = typeStr
+    .trim()
+    .replaceAll(/\s*\|\s*void\s*/g, '')
+    .replaceAll(/void\s*\|\s*/g, '')
+    .replaceAll(/\s*\|\s*null\s*/g, '')
+    .replaceAll(/null\s*\|\s*/g, '')
+    .replaceAll(/\s*\|\s*undefined\s*/g, '')
+    .replaceAll(/undefined\s*\|\s*/g, '')
+    .trim();
+  return typeStr === 'void' || typeStr === 'undefined' || typeStr === 'null'
+    ? ''
+    : typeStr;
+}
+
+function MakeFuncProp(name: string, argPack: string, result: string): FuncProp {
+  result = cleanType(result);
+  argPack = cleanParams(argPack);
+  const args = argPack.substring(1, argPack.length - 1);
+  //console.log(`FuncProp: ${n ame}(${argPack}) : ${result}`);
+  return { name, args, result };
+}
+
+function MakeDataProp(name: string, type: string): DataProp {
+  return { name, type: cleanType(type) };
 }
 
 const project = new Project({
   tsConfigFilePath: 'tsconfig.json',
 });
+
+function MakeProp(name: string, type: string): Property {
+  if (type.startsWith('(')) {
+    // This needs to handle nesting...eventually. For now, just look for the first "=>"
+    const retStart = type.indexOf(') => ') + 5;
+    if (retStart <= 5) {
+      throw new Error('Invalid function signature');
+    }
+    const params = type.slice(0, retStart - 4);
+    return MakeFuncProp(name, params, type.substring(retStart));
+  }
+  return MakeDataProp(name, type);
+}
 
 function extractInterface(iface: InterfaceDeclaration): NodeInfo {
   const name = iface.getName();
@@ -127,10 +195,9 @@ function extractInterface(iface: InterfaceDeclaration): NodeInfo {
     .getExtends()
     .map((e) => e.getExpression().getText());
 
-  const props = iface.getProperties().map((p) => ({
-    name: p.getName(),
-    type: p.getType().getText(),
-  }));
+  const props = iface
+    .getProperties()
+    .map((p) => MakeProp(p.getName(), p.getType().getText()));
 
   return {
     name,
@@ -144,16 +211,15 @@ function extractTypeAlias(alias: TypeAliasDeclaration): NodeInfo {
   const name = alias.getName();
   const type = alias.getType();
 
-  const props: NamedType[] = [];
+  const props: Property[] = [];
+  const extendsNames: string[] = [];
 
   // Handle object-like types
   if (type.isObject()) {
     for (const prop of type.getProperties()) {
       const propType = prop.getTypeAtLocation(alias);
-      props.push({
-        name: prop.getName(),
-        type: propType.getText(),
-      });
+      props.push(MakeProp(prop.getName(), propType.getText()));
+      extendsNames.push(...type.getIntersectionTypes().map((t) => t.getText()));
     }
   }
 
@@ -162,7 +228,7 @@ function extractTypeAlias(alias: TypeAliasDeclaration): NodeInfo {
   return {
     name,
     kind: 'type',
-    extends: [], // type aliases don't "extend" but you can infer relationships
+    extends: extendsNames,
     props,
   };
 }
@@ -178,8 +244,14 @@ for (const sf of project.getSourceFiles()) {
 }
 
 // Emit Mermaid
-console.log('classDiagram');
+console.log(`---
+  config:
+    class:
+      hideEmptyMembersBox: true
+---
+classDiagram`);
 
+// Only show classes that have some relationship or members for now
 // for (const node of nodes.values()) {
 //   console.log(`    class ${node.name}`);
 // }
@@ -192,38 +264,16 @@ for (const node of nodes.values()) {
   }
 }
 
-function cleanParams(params: string): string {
-  // This is a very naive implementation and won't handle nested *anything* correctly.
-  return params.replaceAll(/:[^,]+([),])/g, '$1');
-}
-
-function deImport(typeStr: string): string {
-  // This is a very naive implementation and won't handle nested *anything* correctly.
-  return typeStr.replaceAll(/import\(".*"\)\./g, '');
-}
-
-function deGeneric(typeStr: string): string {
-  return typeStr.replaceAll('<', '~').replaceAll('>', '~');
-}
-
-function getMemberName(p: NamedType): string {
-  if (p.type.startsWith('(')) {
-    // This needs to handle nesting...eventually. For now, just look for the first "=>"
-    const retType = p.type.indexOf(') => ') + 5;
-    if (retType > 5) {
-      const params = p.type.slice(0, retType - 4);
-      return `${p.name}${cleanParams(params)} ${deImport(deGeneric(p.type.substring(retType)))}`;
-    }
-  } else {
-    return `${deImport(deGeneric(p.type))} ${p.name}`;
+function getMemberName(p: Property): string {
+  if ('args' in p) {
+    const res = unVoid(p.result);
+    return `${p.name}(${p.args}) ${res}`;
   }
-  return '';
+  return `${p.type} ${p.name}`;
 }
+
 for (const node of nodes.values()) {
   for (const p of node.props) {
-    // console.log(p.type);
-    // if (nodes.has(p.type)) {
     console.log(`    ${node.name} : ${getMemberName(p)}`);
-    // }
   }
 }
