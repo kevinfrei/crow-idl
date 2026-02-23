@@ -235,4 +235,4 @@ classDiagram`);
   }
 }
 
-MakeMermaidGraph('tsconfig.json');
+MakeMermaidGraph(process.argv.length > 2 ? process.argv[2]! : 'tsconfig.json');
