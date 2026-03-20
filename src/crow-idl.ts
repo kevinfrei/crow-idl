@@ -19,11 +19,12 @@ function err(message: string): void {
 // The remaining arguments are the output files:
 // --cpp:<file> or -c: (or --cpp/-c <file>)
 // --ts:<file>  of -t: (or --ts/t <file>)
-async function main(input: string, ...args: string[]): Promise<void> {
+export async function main(input: string, ...args: string[]): Promise<void> {
   const defsFile = await import(input);
   for (const i in defsFile) {
     console.log(`Loaded ${i}`);
   }
+  console.log('STUFF');
   const ttg = defsFile['TypesToGenerate'];
   if (!chkRecordOf(isString, isTypes)(ttg)) {
     err(`Input file ${input} must export a "TypesToGenerate" SymbolList.`);
@@ -73,13 +74,16 @@ async function main(input: string, ...args: string[]): Promise<void> {
   }
 }
 
-if (process.argv.length < 4) {
-  err('Invalid command line');
-  process.exit(1);
+if (import.meta.main) {
+  // We're executing directly:
+  if (process.argv.length < 4) {
+    err('Invalid command line');
+    process.exit(1);
+  }
+  const args = process.argv.slice(3);
+  console.log(`Generating code from ${process.argv[2]} (${args.join(' ')})`);
+  main(process.argv[2]!, ...args).catch((err) => {
+    console.error('Error generating interface code:', err);
+    process.exit(2);
+  });
 }
-const args = process.argv.slice(3);
-console.log(`Generating code from ${process.argv[2]} (${args.join(' ')})`);
-main(process.argv[2]!, ...args).catch((err) => {
-  console.error('Error generating interface code:', err);
-  process.exit(2);
-});

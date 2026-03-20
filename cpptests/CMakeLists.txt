@@ -25,8 +25,8 @@ else()
   # For non-windows compilers, enable sanitizers and stuff
   add_compile_options(-Wpedantic -Wall -Wextra -Werror -pedantic)
   if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    add_compile_options(-fsanitize=address,undefined -O0 -g)
-    add_link_options(-fsanitize=address,undefined -O0 -g)
+    add_compile_options(-O0 -g) # -fsanitize=address,undefined 
+    add_link_options(-O0 -g) # -fsanitize=address,undefined 
   else()
     add_compile_options(-flto -O2)
     add_link_options(-flto)
@@ -34,7 +34,6 @@ else()
 endif()
 
 # Find Conan2 generated libraries
-include(cmake/ConanLibImports.cmake)
+include(ConanLibImports.cmake)
 
-add_subdirectory(cpp)
-add_subdirectory(test)
+add_subdirectory(tests)

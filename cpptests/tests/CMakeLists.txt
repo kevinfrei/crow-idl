@@ -1,0 +1,6 @@
+enable_testing()
+include(GoogleTest)
+add_executable(idl_testing json_test.cpp)
+target_include_directories(idl_testing PRIVATE .. ../../build)
+target_link_libraries(idl_testing PUBLIC ${CROW_LIB} ${GTEST_LIB})
+gtest_discover_tests(idl_testing)
