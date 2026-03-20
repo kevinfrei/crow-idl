@@ -1,7 +1,8 @@
 /node_modules
 .cache
-CMakeUserPresets.json
+cpptests/CMakeUserPresets.json
 build
 .vs
 Testing
 out
+cpptests/Debug
