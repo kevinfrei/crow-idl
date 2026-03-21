@@ -55,4 +55,6 @@ export const TypesToGenerate: Record<string, Types> = {
   MyNEnum: enum_num(i32(), { a: 1, b: 2, c: 3 }),
   MySEnum: enum_str({ a: 'apple', b: 'banana', c: 'cherry' }),
   Aggregate: obj({ le: ref('MyEnum'), ne: ref('MyNEnum'), se: ref('MySEnum') }),
+  Aggregate2: obj({ tup: ref('MyTup'), opt: ref('MyOpt') }),
+  Aggreagte3: arr(ref('Aggregate2')),
 };

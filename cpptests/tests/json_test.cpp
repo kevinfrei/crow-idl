@@ -355,7 +355,7 @@ TEST(JsonPickling, EnumAggregate) {
   EXPECT_EQ(agg.se, agg_value->se);
 }
 
-TEST(JsonPickling, ComplexAggregate) {
+TEST(JsonPickling, SimpleObject) {
   Shared::MyObj obj{"hello", -42, true, std::nullopt};
   auto json_value = to_json(obj);
   std::string s = json_value.dump();
@@ -369,7 +369,12 @@ TEST(JsonPickling, ComplexAggregate) {
   EXPECT_FALSE(obj_value->d.has_value());
 }
 
-/*  using Tuple = std::tuple<Shared::CurrentView, std::string, double>;
+TEST(JsonPicking, Aggregate2) {
+  Shared::MySub sub{{"parent", 21, false, std::nullopt}, "child", 10};
+  Shared::Aggregate2 agg{{"string", 42, true}, sub};
+}
+/*
+  using Tuple = std::tuple<Shared::CurrentView, std::string, double>;
   using MapType = std::map<Shared::IgnoreItemType, std::vector<Tuple>>;
   MapType myType;
   myType[Shared::IgnoreItemType::DirName] =
