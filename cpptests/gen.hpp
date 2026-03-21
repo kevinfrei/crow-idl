@@ -152,7 +152,6 @@ inline constexpr std::string_view to_name(MyNEnum _value) {
   }
 }
 
-// Could probably be just itoa with a cast
 inline constexpr std::string_view to_string(MyNEnum _value) {
   switch (_value) {
     case MyNEnum::a:

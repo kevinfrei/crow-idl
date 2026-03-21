@@ -197,15 +197,17 @@ ${item.v
   }
 }
 
-template<>
-inline constexpr std::optional<${name}> from_string<${name}>(std::string_view _str) {
+template <>
+inline constexpr std::optional<${name}>
+from_string<${name}>(std::string_view _str) {
   ${typeName} _val;
   auto [ptr, ec] = std::from_chars(_str.data(), _str.data() + _str.size(), _val);
   if (ec != std::errc{}) {
     return std::nullopt;
   }
   ${name} _res = static_cast<${name}>(_val);
-  if (is_valid(_res)) return _res;
+  if (is_valid(_res))
+    return _res;
   return std::nullopt;
 }
 
@@ -250,7 +252,6 @@ ${Object.entries(item.v)
   }
 }
 
-// Could probably be just itoa with a cast
 inline constexpr std::string_view to_string(${name} _value) {
   switch (_value) {
 ${Object.entries(item.v)
@@ -264,15 +265,17 @@ ${Object.entries(item.v)
   }
 }
 
-template<>
-inline constexpr std::optional<${name}> from_string<${name}>(std::string_view _str) {
+template <>
+inline constexpr std::optional<${name}>
+from_string<${name}>(std::string_view _str) {
   ${typeName} _val;
   auto [ptr, ec] = std::from_chars(_str.data(), _str.data() + _str.size(), _val);
   if (ec != std::errc{}) {
     return std::nullopt;
   }
   ${name} _res = static_cast<${name}>(_val);
-  if (is_valid(_res)) return _res;
+  if (is_valid(_res))
+    return _res;
   return std::nullopt;
 }
 
@@ -375,8 +378,8 @@ struct impl_to_json<${namespace}::${name}> {
     ${optional
       .map(
         ([key]) => `if (_value.${key}) {
-       _res["${key}"] = to_json(*_value.${key});
-      }`,
+      _res["${key}"] = to_json(*_value.${key});
+    }`,
       )
       .join('\n    ')}
     return _res;
