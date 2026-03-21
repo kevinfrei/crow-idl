@@ -228,7 +228,6 @@ struct impl_to_json<std::set<T>> {
   }
 };
 
-/* Horsing around a little bit
 template <typename T>
 struct impl_to_json<std::optional<T>> {
   static inline crow::json::wvalue process(const std::optional<T>& value) {
@@ -239,7 +238,6 @@ struct impl_to_json<std::optional<T>> {
     }
   }
 };
-*/
 
 /****
 Conversion from JSON stuff

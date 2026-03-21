@@ -24,7 +24,6 @@ export async function main(input: string, ...args: string[]): Promise<void> {
   for (const i in defsFile) {
     console.log(`Loaded ${i}`);
   }
-  console.log('STUFF');
   const ttg = defsFile['TypesToGenerate'];
   if (!chkRecordOf(isString, isTypes)(ttg)) {
     err(`Input file ${input} must export a "TypesToGenerate" SymbolList.`);
