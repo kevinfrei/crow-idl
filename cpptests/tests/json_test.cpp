@@ -293,6 +293,7 @@ void testMap(const MapType& theMap) {
   // Round-trip validation:
   EXPECT_EQ(*map_val, theMap);
 }
+
 TEST(JsonPickling, std_map_and_hash) {
   std::map<std::string, int> theMap{
       {"a1", 1}, {"b2", 2}, {"c3", 3}, {"d4", 4}, {"e5", 5}};
@@ -341,9 +342,34 @@ TEST(JsonPickling, enumClass) {
   }
 }
 
-/*
-TEST(JsonPickling, MixAndMatch) {
-  using Tuple = std::tuple<Shared::CurrentView, std::string, double>;
+TEST(JsonPickling, EnumAggregate) {
+  Shared::Aggregate agg{
+      Shared::MyEnum::c, Shared::MyNEnum::b, Shared::MySEnum::a};
+  auto json_value = to_json(agg);
+  std::string s = json_value.dump();
+  crow::json::rvalue json_value2 = crow::json::load(s);
+  auto agg_value = from_json<Shared::Aggregate>(json_value2);
+  EXPECT_TRUE(agg_value.has_value());
+  EXPECT_EQ(agg.le, agg_value->le);
+  EXPECT_EQ(agg.ne, agg_value->ne);
+  EXPECT_EQ(agg.se, agg_value->se);
+}
+
+TEST(JsonPickling, ComplexAggregate) {
+  Shared::MyObj obj{"hello", -42, true, std::nullopt};
+  auto json_value = to_json(obj);
+  std::string s = json_value.dump();
+  crow::json::rvalue json_value2 = crow::json::load(s);
+  auto obj_value = from_json<Shared::MyObj>(json_value2);
+  EXPECT_TRUE(obj_value.has_value());
+  EXPECT_STREQ(obj.a.c_str(), obj_value->a.c_str());
+  EXPECT_EQ(obj.b, obj_value->b);
+  EXPECT_EQ(obj.c, obj_value->c);
+  EXPECT_FALSE(obj.d.has_value());
+  EXPECT_FALSE(obj_value->d.has_value());
+}
+
+/*  using Tuple = std::tuple<Shared::CurrentView, std::string, double>;
   using MapType = std::map<Shared::IgnoreItemType, std::vector<Tuple>>;
   MapType myType;
   myType[Shared::IgnoreItemType::DirName] =
