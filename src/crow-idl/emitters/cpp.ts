@@ -91,7 +91,7 @@ function addNonNamespace(lines: string): void {
 }
 
 function generateFooter(): string[] {
-  const res = ['', '', `} // namespace ${namespace}`];
+  const res = ['', `} // namespace ${namespace}`];
   res.push(...outsideNamespace);
   res.push('');
   return res;
@@ -211,8 +211,7 @@ from_string<${name}>(std::string_view _str) {
   return std::nullopt;
 }
 
-#pragma endregion numeric enum ${name}
-`,
+#pragma endregion numeric enum ${name}`,
   ];
 }
 
@@ -279,8 +278,7 @@ from_string<${name}>(std::string_view _str) {
   return std::nullopt;
 }
 
-#pragma endregion linear enum ${name}
-`.split('\n');
+#pragma endregion linear enum ${name}`.split('\n');
 }
 
 function strEnumType(name: string, item: SEnum): string[] {
@@ -331,8 +329,7 @@ ${Object.entries(item.v)
   return std::nullopt;
 }
 
-#pragma endregion string enum ${name}
-`.split('\n');
+#pragma endregion string enum ${name}`.split('\n');
   addNonNamespace(`#pragma region JSON serialization for string enum ${name}
 template <>
 inline crow::json::wvalue to_json<${namespace}::${name}>(
@@ -350,8 +347,7 @@ struct impl_from_json<${namespace}::${name}> {
         std::string_view{_str.begin(), _str.size()});
   }
 };
-#pragma endregion JSON serialization for string enum ${name}
-`);
+#pragma endregion JSON serialization for string enum ${name}`);
   return res;
 }
 
@@ -419,8 +415,7 @@ from_json<${namespace}::${name}>(
     .join('\n  ')}
   return _res;
 }
-#pragma endregion JSON serialization for object ${name}
-`);
+#pragma endregion JSON serialization for object ${name}`);
   return res;
 }
 
@@ -454,8 +449,7 @@ from_json<${namespace}::${name}>(
     return std::nullopt;
   std::optional<${namespace}::${item.p}> _base = from_json<${namespace}::${item.p}>(_value);
   if (!_base.has_value())
-    return std::nullopt;
-  
+    return std::nullopt;  
   ${Object.entries(item.d)
     .map(
       ([key, value]) => `
@@ -463,8 +457,7 @@ from_json<${namespace}::${name}>(
     return std::nullopt;
   auto _${key}_opt_ = from_json<${getTypeName(value, true)}>(_value["${key}"]);
   if (!_${key}_opt_.has_value())
-    return std::nullopt;
-  `,
+    return std::nullopt;`,
     )
     .join('\n  ')}
   ${namespace}::${name} _res{std::move(*_base), ${
@@ -476,8 +469,7 @@ from_json<${namespace}::${name}>(
 
   return _res;
 }
-#pragma endregion JSON serialization for object ${name}
-`);
+#pragma endregion JSON serialization for object ${name}`);
   return res;
 }
 
