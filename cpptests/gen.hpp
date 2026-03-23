@@ -326,14 +326,12 @@ inline std::optional<Shared::MySub> from_json<Shared::MySub>(
   auto _y_opt_ = from_json<std::int32_t>(_value["y"]);
   if (!_y_opt_.has_value())
     return std::nullopt;
-
   Shared::MySub _res{
       std::move(*_base), std::move(*_x_opt_), std::move(*_y_opt_)};
 
   return _res;
 }
 #pragma endregion JSON serialization for object MySub
-
 #pragma region JSON serialization for string enum MySEnum
 template <>
 inline crow::json::wvalue to_json<Shared::MySEnum>(Shared::MySEnum _value) {

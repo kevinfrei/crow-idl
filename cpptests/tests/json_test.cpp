@@ -372,6 +372,12 @@ TEST(JsonPickling, SimpleObject) {
 TEST(JsonPicking, Aggregate2) {
   Shared::MySub sub{{"parent", 21, false, std::nullopt}, "child", 10};
   Shared::Aggregate2 agg{{"string", 42, true}, sub};
+  auto json_value = to_json(agg);
+  std::string s = json_value.dump();
+  std::cout << "Before:" << s << std::endl;
+  crow::json::rvalue json_value2 = crow::json::load(s);
+  auto agg_value = from_json<Shared::Aggregate2>(json_value2);
+  EXPECT_TRUE(agg_value.has_value());
 }
 /*
   using Tuple = std::tuple<Shared::CurrentView, std::string, double>;

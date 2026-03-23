@@ -34,6 +34,15 @@ unmarshalling the types as CrowCpp's JSON types.
       project, because it's pretty cool (and a lot better than Crow's stuff). Or
       maybe just add his stuff as a possible target option?
 
+Notes:
+
+- 'ref' is more restrictive that most other stuff, in that you cannot have a ref
+  to anything that requires 'deep' understanding of it's content. At this
+  writing, I believe that means you can't have a ref to an opt type.
+
+- 'opt' types don't really nest. An opt to an opt to an opt (should) flatten
+  out.
+
 ## ts-class-graph
 
 Create a mermaid class graph from Typescript types & interfaces. This is very

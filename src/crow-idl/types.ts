@@ -1,3 +1,6 @@
+// These could be longer & more descriptive, but I'm using indexOf into a
+// substring to check for a set of different types, and that's super easy.
+// It's cheating, but easy.
 export enum TypeId {
   Str = 's',
   Char = 'c',
