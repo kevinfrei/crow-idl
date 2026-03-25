@@ -1,6 +1,6 @@
 {
   "name": "@freik/ts-cpp-tooling",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "description": "A simple IDL for use with CrowCpp (C++) and TypeScript",
   "module": "build/index.js",
   "type": "module",
@@ -16,7 +16,7 @@
     "format": "tools format bun",
     "clean": "rm -rf build && git restore build/NOTE.md",
     "cfg": "cd cpptests && cmake --preset debug",
-    "cpp": "cd cpptests && cmake --build Debug",
+    "cpp": "cd cpptests && cmake --build Debug && cd Debug/tests && ctest",
     "typechk": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
     "bld": "tsc && bun build --outdir build ./index.ts ./src/crow-idl.ts ./src/ts-class-graph.ts --minify --external typescript --external prettier --external @freik/typechk --external ts-morph",

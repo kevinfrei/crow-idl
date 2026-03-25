@@ -234,9 +234,9 @@ struct Aggregate {
 
 struct Aggregate2 {
   MyTup tup;
-  MyOpt opt;
+  std::optional<MySub> opt;
 };
-using Aggreagte3 = std::vector<Aggregate2>;
+using Aggregate3 = std::vector<Aggregate2>;
 
 } // namespace Shared
 
@@ -401,8 +401,9 @@ struct impl_to_json<Shared::Aggregate2> {
   static inline crow::json::wvalue process(const Shared::Aggregate2& _value) {
     crow::json::wvalue _res;
     _res["tup"] = to_json(_value.tup);
-    _res["opt"] = to_json(_value.opt);
-
+    if (_value.opt) {
+      _res["opt"] = to_json(*_value.opt);
+    }
     return _res;
   }
 };
@@ -421,13 +422,14 @@ inline std::optional<Shared::Aggregate2> from_json<Shared::Aggregate2>(
     return std::nullopt;
   _res.tup = std::move(*_tup_opt_);
 
-  if (!_value.has("opt"))
-    return std::nullopt;
-  auto _opt_opt_ = from_json<Shared::MyOpt>(_value["opt"]);
-  if (!_opt_opt_.has_value())
-    return std::nullopt;
-  _res.opt = std::move(*_opt_opt_);
-
+  if (_value.has("opt")) {
+    auto _opt_opt_ = from_json<Shared::MySub>(_value["opt"]);
+    if (!_opt_opt_.has_value())
+      return std::nullopt;
+    _res.opt = std::move(*_opt_opt_);
+  } else {
+    _res.opt = std::nullopt;
+  }
   return _res;
 }
 #pragma endregion JSON serialization for object Aggregate2
