@@ -374,11 +374,28 @@ TEST(JsonPicking, Aggregate2) {
   Shared::Aggregate2 agg{{"string", 42, true}, sub};
   auto json_value = to_json(agg);
   std::string s = json_value.dump();
-  std::cout << "Before:" << s << std::endl;
   crow::json::rvalue json_value2 = crow::json::load(s);
   auto agg_value = from_json<Shared::Aggregate2>(json_value2);
   EXPECT_TRUE(agg_value.has_value());
+  // TODO: Check equivalence
+  Shared::Aggregate3 arr;
+  arr.push_back(agg);
+  arr.push_back(agg);
+  arr.push_back(agg);
+  std::get<1>(arr[0].tup) = 21;
+  std::get<1>(arr[1].tup) = 14;
+  std::get<1>(arr[2].tup) = 7;
+  json_value = to_json(arr);
+  s = json_value.dump();
+  std::cout << "Before:" << s << std::endl;
+  json_value2 = crow::json::load(s);
+  auto arr_value = from_json<Shared::Aggregate3>(json_value2);
+  EXPECT_TRUE(arr_value.has_value());
+  EXPECT_EQ(arr_value->size(), arr.size());
 }
+
+// TODO: Add a bun/c++ roundtrip
+
 /*
   using Tuple = std::tuple<Shared::CurrentView, std::string, double>;
   using MapType = std::map<Shared::IgnoreItemType, std::vector<Tuple>>;

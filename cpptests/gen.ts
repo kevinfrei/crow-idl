@@ -194,17 +194,16 @@ export const chkAggregate: TC.typecheck<Aggregate> = TC.chkObjectOfType(
 
 export type Aggregate2 = {
   tup: MyTup;
-  opt: MyOpt;
+  opt?: MySub;
 };
 export const chkAggregate2: TC.typecheck<Aggregate2> = TC.chkObjectOfType(
   {
     tup: chkMyTup,
-    opt: chkMyOpt,
   },
-  {},
+  { opt: chkOptional(chkMySub) },
 );
 
-export type Aggreagte3 = Aggregate2[];
-export const chkAggreagte3 = TC.chkArrayOf(chkAggregate2);
+export type Aggregate3 = Aggregate2[];
+export const chkAggregate3 = TC.chkArrayOf(chkAggregate2);
 
 // End of generated code
