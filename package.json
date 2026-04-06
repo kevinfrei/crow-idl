@@ -16,7 +16,7 @@
     "format": "tools format bun",
     "clean": "rm -rf build && git restore build/NOTE.md",
     "cfg": "cd cpptests && cmake --preset debug",
-    "cpp": "cd cpptests && cmake --build Debug && cd Debug/tests && ctest",
+    "cpp": "cd cpptests && cmake --build Debug && cd Debug/tests && ctest --output-on-failure",
     "typechk": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
     "bld": "tsc && bun build --outdir build ./index.ts ./src/crow-idl.ts ./src/ts-class-graph.ts --minify --external typescript --external prettier --external @freik/typechk --external ts-morph",

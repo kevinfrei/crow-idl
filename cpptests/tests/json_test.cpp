@@ -377,7 +377,19 @@ TEST(JsonPicking, Aggregate2) {
   crow::json::rvalue json_value2 = crow::json::load(s);
   auto agg_value = from_json<Shared::Aggregate2>(json_value2);
   EXPECT_TRUE(agg_value.has_value());
-  // TODO: Check equivalence
+  EXPECT_STREQ(std::get<0>(agg.tup).c_str(),
+               std::get<0>(agg_value->tup).c_str());
+  EXPECT_EQ(std::get<1>(agg.tup), std::get<1>(agg_value->tup));
+  EXPECT_EQ(std::get<2>(agg.tup), std::get<2>(agg_value->tup));
+  EXPECT_EQ(agg.opt.has_value(), agg_value->opt.has_value());
+  EXPECT_STREQ(agg.opt->a.c_str(), agg_value->opt->a.c_str());
+  EXPECT_EQ(agg.opt->b, agg_value->opt->b);
+  EXPECT_EQ(agg.opt->c, agg_value->opt->c);
+  EXPECT_EQ(agg.opt->d.has_value(), agg_value->opt->d.has_value());
+  EXPECT_FALSE(agg.opt->d.has_value());
+  EXPECT_FALSE(agg_value->opt->d.has_value());
+  EXPECT_STREQ(agg.opt->x.c_str(), agg_value->opt->x.c_str());
+  EXPECT_EQ(agg.opt->y, agg_value->opt->y);
   Shared::Aggregate3 arr;
   arr.push_back(agg);
   arr.push_back(agg);
@@ -392,6 +404,7 @@ TEST(JsonPicking, Aggregate2) {
   auto arr_value = from_json<Shared::Aggregate3>(json_value2);
   EXPECT_TRUE(arr_value.has_value());
   EXPECT_EQ(arr_value->size(), arr.size());
+  // TODO: Check equivalence
 }
 
 // TODO: Add a bun/c++ roundtrip
