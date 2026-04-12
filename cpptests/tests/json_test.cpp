@@ -1,6 +1,7 @@
 #include <iostream>
 #include <optional>
 #include <string>
+#include <thread>
 
 #include <crow.h>
 #include <gtest/gtest.h>
