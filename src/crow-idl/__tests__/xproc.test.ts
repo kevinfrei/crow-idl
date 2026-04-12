@@ -2,7 +2,38 @@ import { hasField, Pickle, Unpickle } from '@freik/typechk';
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
 import { spawn } from 'child_process';
 import * as readline from 'readline';
-import { chkAggregate, chkAggregate2, chkAggregate3, chkCharFastSet, chkInt16Set, chkInt32toStrMap, chkInt8Array, chkMyBoolean, chkMyChar, chkMyEnum, chkMyFloat, chkMyI16, chkMyI32, chkMyI64, chkMyI8, chkMyNEnum, chkMyObj, chkMyOpt, chkMySEnum, chkMyString, chkMySub, chkMyTup, chkMyU16, chkMyU32, chkMyU64, chkMyU8, chkStrToU16FastMap, MyEnum, MyNEnum, MySEnum } from '../../../cpptests/gen.ts';
+import {
+  chkAggregate,
+  chkAggregate2,
+  chkAggregate3,
+  chkCharFastSet,
+  chkInt16Set,
+  chkInt32toStrMap,
+  chkInt8Array,
+  chkMyBoolean,
+  chkMyChar,
+  chkMyEnum,
+  chkMyFloat,
+  chkMyI16,
+  chkMyI32,
+  chkMyI64,
+  chkMyI8,
+  chkMyNEnum,
+  chkMyObj,
+  chkMyOpt,
+  chkMySEnum,
+  chkMyString,
+  chkMySub,
+  chkMyTup,
+  chkMyU16,
+  chkMyU32,
+  chkMyU64,
+  chkMyU8,
+  chkStrToU16FastMap,
+  MyEnum,
+  MyNEnum,
+  MySEnum,
+} from '../../../cpptests/gen.ts';
 /*
 
 MyI8 = number;
@@ -77,6 +108,7 @@ describe('C++/JS Pipe', () => {
     }
   });
   test('C++ roundtripping some IDL types', async () => {
+    // This stuff is reflected in the xproc_test.cpp file, as well.
     const tests = [
       { id: 'MyI8', chk: chkMyI8, input: -122 },
       { id: 'MyI16', chk: chkMyI16, input: -16384 },
@@ -84,7 +116,7 @@ describe('C++/JS Pipe', () => {
       { id: 'MyI64', chk: chkMyI64, input: -123456789012345n },
       { id: 'MyU8', chk: chkMyU8, input: 255 },
       { id: 'MyU16', chk: chkMyU16, input: 65535 },
-      { id: 'MyU32', chk: chkMyU32 , input: 4294967295 },
+      { id: 'MyU32', chk: chkMyU32, input: 4294967295 },
       { id: 'MyU64', chk: chkMyU64, input: 9876543210987654n },
       { id: 'MyFloat', chk: chkMyFloat, input: 3.14 },
       { id: 'MyString', chk: chkMyString, input: 'Hello, World!' },
@@ -92,17 +124,43 @@ describe('C++/JS Pipe', () => {
       { id: 'MyChar', chk: chkMyChar, input: 'A' },
       { id: 'Int8Array', chk: chkInt8Array, input: [-128, 0, 127] },
       { id: 'Int16Set', chk: chkInt16Set, input: new Set([1, 2, 3]) },
-      { id: 'CharFastSet', chk: chkCharFastSet, input: new Set(['x', 'y', 'z']) },
-      { id: 'Int32toStrMap', chk: chkInt32toStrMap, input: new Map([[ 1, 'one' ], [ 2, 'two' ]]) },
-      { id: 'StrToU16FastMap', chk: chkStrToU16FastMap, input: new Map([['a', 1], ['b', 2]]) },
-      { id: 'MyObj', chk: chkMyObj, input: { a: 'test', b: 42, c: true, d: 'o' } },
+      {
+        id: 'CharFastSet',
+        chk: chkCharFastSet,
+        input: new Set(['x', 'y', 'z']),
+      },
+      {
+        id: 'Int32toStrMap',
+        chk: chkInt32toStrMap,
+        input: new Map([
+          [1, 'one'],
+          [2, 'two'],
+        ]),
+      },
+      {
+        id: 'StrToU16FastMap',
+        chk: chkStrToU16FastMap,
+        input: new Map([
+          ['a', 1],
+          ['b', 2],
+        ]),
+      },
+      {
+        id: 'MyObj',
+        chk: chkMyObj,
+        input: { a: 'test', b: 42, c: true, d: 'o' },
+      },
       {
         id: 'MySub',
         chk: chkMySub,
         input: { a: 'subtest', b: 24, c: false, x: 'extra', y: 99 },
       },
       { id: 'MyTup', chk: chkMyTup, input: ['tuple', 123, false] },
-      { id: 'MyOpt', chk: chkMyOpt, input: { a: 'opt', b: 7, c: true, x: 'subopt', y: 88 } },
+      {
+        id: 'MyOpt',
+        chk: chkMyOpt,
+        input: { a: 'opt', b: 7, c: true, x: 'subopt', y: 88 },
+      },
       // You cannot have an optional top-level type
       // { id: 'MyOpt 2', chk: chkMyOpt, input: undefined },
       { id: 'MyEnum', chk: chkMyEnum, input: MyEnum.a },
@@ -121,7 +179,11 @@ describe('C++/JS Pipe', () => {
           opt: { a: 'opt2', b: 8, c: false, x: 'subopt2', y: 77 },
         },
       },
-      { id: 'Aggregate2', chk: chkAggregate2, input: { tup: ['agg2-noopt', 789, false] } },
+      {
+        id: 'Aggregate2',
+        chk: chkAggregate2,
+        input: { tup: ['agg2-noopt', 789, false] },
+      },
       {
         id: 'Aggregate3',
         chk: chkAggregate3,
@@ -136,9 +198,13 @@ describe('C++/JS Pipe', () => {
     ];
     for (const test of tests) {
       const result = await send({ id: test.id, input: test.input });
+      console.log(test.input);
       expect(result).toEqual({ id: test.id, output: test.input });
       if (!hasField(result, 'output')) {
-        console.error(`Missing 'output' field in response for ${test.id}:`, result);
+        console.error(
+          `Missing 'output' field in response for ${test.id}:`,
+          result,
+        );
         expect(result).toHaveProperty('output');
         continue;
       }
