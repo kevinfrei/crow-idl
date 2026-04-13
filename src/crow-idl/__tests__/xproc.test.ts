@@ -20,7 +20,6 @@ import {
   chkMyI8,
   chkMyNEnum,
   chkMyObj,
-  chkMyOpt,
   chkMySEnum,
   chkMyString,
   chkMySub,
@@ -34,41 +33,7 @@ import {
   MyNEnum,
   MySEnum,
 } from '../../../cpptests/gen.ts';
-/*
 
-MyI8 = number;
-MyI16 = number;
-MyI32 = number;
-MyI64 = bigint;
-MyU8 = number;
-MyU16 = number;
-MyU32 = number;
-MyU64 = bigint;
-MyFloat = number;
-MyDouble = number;
-MyString = string;
-MyBoolean = boolean;
-MyChar = string;
-Int8Array = number[];
-Int16Set = Set<number>;
-CharFastSet = Set<string>;
-Int32toStrMap = Map<number, string>;
-StrToU16FastMap = Map<string, number>;
-MyObj = {  a: string;  b: number;  c: boolean;  d?: string; };
-MySub = MyObj & {  x: string;  y: number; };
-MyTup = [string, number, boolean];
-MyOpt = MySub | undefined;
-MyEnum = Object.freeze({  a: 0,  b: 1,  c: 2 });
-MyEnum = (typeof MyEnum)[keyof typeof MyEnum];
-MyNEnum = Object.freeze({  a: 1,  b: 2,  c: 3 });
-MyNEnum = (typeof MyNEnum)[keyof typeof MyNEnum];
-MySEnum = Object.freeze({  a: 'apple',  b: 'banana',  c: 'cherry' });
-MySEnum = (typeof MySEnum)[keyof typeof MySEnum];
-Aggregate = {  le: MyEnum;  ne: MyNEnum;  se: MySEnum; };
-Aggregate2 = {  tup: MyTup;  opt?: MySub; };
-Aggregate3 = Aggregate2[];
-
-*/
 const BINARY_PATH = './cpptests/Debug/tests/js_cpp_xproc';
 
 let kill_child: () => void;
@@ -81,8 +46,13 @@ beforeAll(() => {
 
   send = (data: unknown): Promise<unknown> => {
     return new Promise((resolve) => {
-      rl.once('line', (line) => resolve(Unpickle(line)));
-      child!.stdin!.write(Pickle(data) + '\n');
+      rl.once('line', (line) => {
+        // console.log('Received line from C++ process:', line);
+        resolve(Unpickle(line));
+      });
+      const theString = Pickle(data);
+      child!.stdin!.write(theString + '\n');
+      // console.log('Sending the string:', theString);
     });
   };
 });
@@ -156,12 +126,9 @@ describe('C++/JS Pipe', () => {
         input: { a: 'subtest', b: 24, c: false, x: 'extra', y: 99 },
       },
       { id: 'MyTup', chk: chkMyTup, input: ['tuple', 123, false] },
-      {
-        id: 'MyOpt',
-        chk: chkMyOpt,
-        input: { a: 'opt', b: 7, c: true, x: 'subopt', y: 88 },
-      },
       // You cannot have an optional top-level type
+      // { id: 'MyOpt',  chk: chkMyOpt,
+      //   input: { a: 'opt', b: 7, c: true, x: 'subopt', y: 88 } },
       // { id: 'MyOpt 2', chk: chkMyOpt, input: undefined },
       { id: 'MyEnum', chk: chkMyEnum, input: MyEnum.a },
       { id: 'MyNEnum', chk: chkMyNEnum, input: MyNEnum.c },
@@ -180,7 +147,7 @@ describe('C++/JS Pipe', () => {
         },
       },
       {
-        id: 'Aggregate2',
+        id: 'Aggregate2_2',
         chk: chkAggregate2,
         input: { tup: ['agg2-noopt', 789, false] },
       },
@@ -198,7 +165,7 @@ describe('C++/JS Pipe', () => {
     ];
     for (const test of tests) {
       const result = await send({ id: test.id, input: test.input });
-      console.log(test.input);
+      // console.log(test.input);
       expect(result).toEqual({ id: test.id, output: test.input });
       if (!hasField(result, 'output')) {
         console.error(

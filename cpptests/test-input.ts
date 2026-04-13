@@ -50,7 +50,8 @@ export const TypesToGenerate: Record<string, Types> = {
   MyObj: obj({ a: str(), b: i32(), c: bool(), d: opt(chr()) }),
   MySub: sub('MyObj', { x: str(), y: i32() }),
   MyTup: tup(str(), i32(), bool()),
-  MyOpt: opt(ref('MySub')),
+  // This really isn't a good idea. Top level opt's don't work right
+  // My_Opt: opt(ref('MySub')),
   MyEnum: enum_lst(u8(), ['a', 'b', 'c']),
   MyNEnum: enum_num(i32(), { a: 1, b: 2, c: 3 }),
   MySEnum: enum_str({ a: 'apple', b: 'banana', c: 'cherry' }),

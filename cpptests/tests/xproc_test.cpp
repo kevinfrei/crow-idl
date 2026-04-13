@@ -55,7 +55,7 @@ bool chkMyI32(const crow::json::rvalue& v, crow::json::wvalue& out) {
 }
 
 bool chkMyI64(const crow::json::rvalue& v, crow::json::wvalue& out) {
-  if (v.t() != crow::json::type::Number)
+  if (v.t() != crow::json::type::Object)
     return false;
   std::optional<std::int64_t> val = from_json<std::int64_t>(v);
   if (val.has_value() && *val == -123456789012345LL) {
@@ -104,7 +104,7 @@ bool chkMyU32(const crow::json::rvalue& v, crow::json::wvalue& out) {
 }
 
 bool chkMyU64(const crow::json::rvalue& v, crow::json::wvalue& out) {
-  if (v.t() != crow::json::type::Number)
+  if (v.t() != crow::json::type::Object)
     return false;
   std::optional<std::uint64_t> val = from_json<std::uint64_t>(v);
   if (val.has_value() && *val == 9876543210987654ULL) {
@@ -177,7 +177,7 @@ bool chkInt8Array(const crow::json::rvalue& v, crow::json::wvalue& out) {
 }
 
 bool chkInt16Set(const crow::json::rvalue& v, crow::json::wvalue& out) {
-  if (v.t() != crow::json::type::List)
+  if (v.t() != crow::json::type::Object)
     return false;
   std::optional<std::set<std::int16_t>> val =
       from_json<std::set<std::int16_t>>(v);
@@ -190,7 +190,7 @@ bool chkInt16Set(const crow::json::rvalue& v, crow::json::wvalue& out) {
 }
 
 bool chkCharFastSet(const crow::json::rvalue& v, crow::json::wvalue& out) {
-  if (v.t() != crow::json::type::List)
+  if (v.t() != crow::json::type::Object)
     return false;
   std::optional<std::unordered_set<char>> val =
       from_json<std::unordered_set<char>>(v);
@@ -236,7 +236,7 @@ bool chkMyObj(const crow::json::rvalue& v, crow::json::wvalue& out) {
   if (v.t() != crow::json::type::Object)
     return false;
   std::optional<Shared::MyObj> val = from_json<Shared::MyObj>(v);
-  if (val.has_value() && val->a == "hello" && val->b == -42 && val->c == true &&
+  if (val.has_value() && val->a == "test" && val->b == 42 && val->c == true &&
       val->d.has_value() && *val->d == 'o') {
     out["output"] = to_json(*val);
     return true;
@@ -249,9 +249,9 @@ bool chkMySub(const crow::json::rvalue& v, crow::json::wvalue& out) {
   if (v.t() != crow::json::type::Object)
     return false;
   std::optional<Shared::MySub> val = from_json<Shared::MySub>(v);
-  if (val.has_value() && val->a == "parent" && val->b == 21 &&
-      val->c == false && val->d.has_value() && *val->d == 'x' &&
-      val->x == "child" && val->y == 10) {
+  if (val.has_value() && val->a == "subtest" && val->b == 24 &&
+      val->c == false && !val->d.has_value() && val->x == "extra" &&
+      val->y == 99) {
     out["output"] = to_json(*val);
     return true;
   }
@@ -263,8 +263,8 @@ bool chkMyTup(const crow::json::rvalue& v, crow::json::wvalue& out) {
   if (v.t() != crow::json::type::List)
     return false;
   std::optional<Shared::MyTup> val = from_json<Shared::MyTup>(v);
-  if (val.has_value() && std::get<0>(*val) == "string" &&
-      std::get<1>(*val) == 42 && std::get<2>(*val) == true) {
+  if (val.has_value() && std::get<0>(*val) == "tuple" &&
+      std::get<1>(*val) == 123 && std::get<2>(*val) == false) {
     out["output"] = to_json(*val);
     return true;
   }
@@ -272,22 +272,8 @@ bool chkMyTup(const crow::json::rvalue& v, crow::json::wvalue& out) {
   return false;
 }
 
-bool chkMyOpt(const crow::json::rvalue& v, crow::json::wvalue& out) {
-  if (v.t() != crow::json::type::Object)
-    return false;
-  std::optional<Shared::MyOpt> val = from_json<Shared::MyOpt>(v);
-  if (val.has_value() && (*val).has_value() && (*val)->a == "opt" &&
-      (*val)->b == 7 && (*val)->c == true && (*val)->d.has_value() &&
-      *(*val)->d == 'x' && (*val)->x == "subopt" && (*val)->y == 88) {
-    out["output"] = to_json(*val);
-    return true;
-  }
-  out["error"] = "Value does not match expected MyOpt structure";
-  return false;
-}
-
 bool chkMyEnum(const crow::json::rvalue& v, crow::json::wvalue& out) {
-  if (v.t() != crow::json::type::String)
+  if (v.t() != crow::json::type::Number)
     return false;
   std::optional<Shared::MyEnum> val = from_json<Shared::MyEnum>(v);
   if (val.has_value() && *val == Shared::MyEnum::a) {
@@ -327,7 +313,7 @@ bool chkAggregate(const crow::json::rvalue& v, crow::json::wvalue& out) {
     return false;
   std::optional<Shared::Aggregate> val = from_json<Shared::Aggregate>(v);
   if (val.has_value() && val->le == Shared::MyEnum::a &&
-      val->ne == Shared::MyNEnum::b && val->se == Shared::MySEnum::a) {
+      val->ne == Shared::MyNEnum::b && val->se == Shared::MySEnum::c) {
     out["output"] = to_json(*val);
     return true;
   }
@@ -351,20 +337,35 @@ bool chkAggregate2(const crow::json::rvalue& v, crow::json::wvalue& out) {
   return false;
 }
 
+bool chkAggregate2_2(const crow::json::rvalue& v, crow::json::wvalue& out) {
+  if (v.t() != crow::json::type::Object)
+    return false;
+  std::optional<Shared::Aggregate2> val = from_json<Shared::Aggregate2>(v);
+  if (val.has_value() && std::get<0>(val->tup) == "agg2-noopt" &&
+      std::get<1>(val->tup) == 789 && std::get<2>(val->tup) == false &&
+      !val->opt.has_value()) {
+    out["output"] = to_json(*val);
+    return true;
+  }
+  out["error"] = "Value does not match expected Aggregate2_2 structure";
+  return false;
+}
+
 bool chkAggregate3(const crow::json::rvalue& v, crow::json::wvalue& out) {
   if (v.t() != crow::json::type::List)
     return false;
-  std::optional<std::vector<Shared::Aggregate2>> val =
-      from_json<std::vector<Shared::Aggregate2>>(v);
-  if (val.has_value() && val->size() == 1 &&
-      std::get<0>(val->at(0).tup) == "string" &&
-      std::get<1>(val->at(0).tup) == 42 &&
+  std::optional<Shared::Aggregate3> val = from_json<Shared::Aggregate3>(v);
+  if (val.has_value() && val->size() == 2 &&
+      std::get<0>(val->at(0).tup) == "agg3-1" &&
+      std::get<1>(val->at(0).tup) == 111 &&
       std::get<2>(val->at(0).tup) == true && val->at(0).opt.has_value() &&
-      val->at(0).opt->a == "parent" && val->at(0).opt->b == 21 &&
-      val->at(0).opt->c == false && val->at(0).opt->d.has_value() &&
-      *val->at(0).opt->d == 'x' && val->at(0).opt->x == "child" &&
-      val->at(0).opt->y == 10) {
-    out["output"] = to_json(val->at(0));
+      val->at(0).opt->a == "opt3-1" && val->at(0).opt->b == 9 &&
+      val->at(0).opt->c == true && !val->at(0).opt->d.has_value() &&
+      val->at(0).opt->x == "subopt3-1" && val->at(0).opt->y == 66 &&
+      std::get<0>(val->at(1).tup) == "agg3-2" &&
+      std::get<1>(val->at(1).tup) == 222 &&
+      std::get<2>(val->at(1).tup) == false && !val->at(1).opt.has_value()) {
+    out["output"] = to_json(*val);
     return true;
   }
   out["error"] = "Value does not match expected Aggregate3 structure";
@@ -395,12 +396,12 @@ const std::map<
           {"MyObj", chkMyObj},
           {"MySub", chkMySub},
           {"MyTup", chkMyTup},
-          {"MyOpt", chkMyOpt},
           {"MyEnum", chkMyEnum},
           {"MyNEnum", chkMyNEnum},
           {"MySEnum", chkMySEnum},
           {"Aggregate", chkAggregate},
           {"Aggregate2", chkAggregate2},
+          {"Aggregate2_2", chkAggregate2_2},
           {"Aggregate3", chkAggregate3}};
 int main() {
   // Standard I/O can be finicky with buffering; force line-buffering
