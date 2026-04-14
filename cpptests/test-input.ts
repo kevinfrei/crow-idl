@@ -14,6 +14,7 @@ import {
   i64,
   i8,
   map,
+  num,
   obj,
   opt,
   ref,
@@ -53,7 +54,9 @@ export const TypesToGenerate: Record<string, Types> = {
   // This really isn't a good idea. Top level opt's don't work right
   // My_Opt: opt(ref('MySub')),
   MyEnum: enum_lst(u8(), ['a', 'b', 'c']),
+  MyEnum2: enum_lst(num(), ['a', 'b', 'c']),
   MyNEnum: enum_num(i32(), { a: 1, b: 2, c: 3 }),
+  MyNEnum2: enum_num(num(), { a: 1, b: 2, c: 3 }),
   MySEnum: enum_str({ a: 'apple', b: 'banana', c: 'cherry' }),
   Aggregate: obj({ le: ref('MyEnum'), ne: ref('MyNEnum'), se: ref('MySEnum') }),
   // Aggregates must have opts as top-level types. This won't work:

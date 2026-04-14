@@ -296,6 +296,30 @@ bool chkMyNEnum(const crow::json::rvalue& v, crow::json::wvalue& out) {
   return false;
 }
 
+bool chkMyEnum2(const crow::json::rvalue& v, crow::json::wvalue& out) {
+  if (v.t() != crow::json::type::Number)
+    return false;
+  std::optional<Shared::MyEnum> val = from_json<Shared::MyEnum>(v);
+  if (val.has_value() && *val == Shared::MyEnum::b) {
+    out["output"] = to_json(*val);
+    return true;
+  }
+  out["error"] = "Value is not 'b' or not a MyEnum2";
+  return false;
+}
+
+bool chkMyNEnum2(const crow::json::rvalue& v, crow::json::wvalue& out) {
+  if (v.t() != crow::json::type::Number)
+    return false;
+  std::optional<Shared::MyNEnum> val = from_json<Shared::MyNEnum>(v);
+  if (val.has_value() && *val == Shared::MyNEnum::b) {
+    out["output"] = to_json(*val);
+    return true;
+  }
+  out["error"] = "Value is not 'b' or not a MyNEnum2";
+  return false;
+}
+
 bool chkMySEnum(const crow::json::rvalue& v, crow::json::wvalue& out) {
   if (v.t() != crow::json::type::String)
     return false;
@@ -397,7 +421,9 @@ const std::map<
           {"MySub", chkMySub},
           {"MyTup", chkMyTup},
           {"MyEnum", chkMyEnum},
+          {"MyEnum2", chkMyEnum2},
           {"MyNEnum", chkMyNEnum},
+          {"MyNEnum2", chkMyNEnum2},
           {"MySEnum", chkMySEnum},
           {"Aggregate", chkAggregate},
           {"Aggregate2", chkAggregate2},

@@ -114,6 +114,8 @@ function getTypeName(type: Types, scoped?: boolean): string {
     return 'std::uint64_t';
   } else if (isI64Type(type)) {
     return 'std::int64_t';
+  } else if (isPlainIntEnumType(type)) {
+    return 'int';
   } else if (isStringType(type)) {
     return 'std::string';
   } else if (isCharType(type)) {
