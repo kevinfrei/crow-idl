@@ -25,11 +25,11 @@
     "testgen": "bun run cpptests/generate.ts",
     "watch": "bun test --watch",
     "test": "bun run typechk && bun run justtest",
-    "prepublishOnly": "bun run bld",
-    "*": "Hooks for Husky",
-    "prepare": "husky",
-    "hook-commit": "bun run format",
-    "hook-push": "bun run test"
+    "prepublishOnly": "bun run bld"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "bun run format",
+    "pre-push": "bun run test"
   },
   "dependencies": {
     "prettier-plugin-organize-imports": "^4.3.0",
@@ -48,8 +48,8 @@
     "clang-format": "^1.8.0",
     "eslint": "^10.0.3",
     "globals": "^17.4.0",
-    "husky": "^9.1.7",
     "prettier": "^3.8.1",
+    "simple-git-hooks": "^2.13.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.1"
   }
