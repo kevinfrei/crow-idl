@@ -408,8 +408,6 @@ TEST(JsonPicking, Aggregate2) {
   // TODO: Check equivalence
 }
 
-// TODO: Add a bun/c++ roundtrip
-
 /*
   using Tuple = std::tuple<Shared::CurrentView, std::string, double>;
   using MapType = std::map<Shared::IgnoreItemType, std::vector<Tuple>>;
