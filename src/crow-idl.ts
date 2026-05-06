@@ -3,6 +3,7 @@ import { chkRecordOf, isString } from '@freik/typechk';
 import { isTypes } from './crow-idl/IDL';
 import { GetCppGenerator } from './crow-idl/emitters/cpp';
 import { GetTypescriptGenerator } from './crow-idl/emitters/typescript';
+import path from 'node:path';
 
 function err(message: string): void {
   console.error(`Error: ${message}`);
@@ -20,7 +21,9 @@ function err(message: string): void {
 // --cpp:<file> or -c: (or --cpp/-c <file>)
 // --ts:<file>  of -t: (or --ts/t <file>)
 export async function main(input: string, ...args: string[]): Promise<void> {
-  const defsFile = await import(input);
+  const cwd = process.cwd();
+  const theFile = path.isAbsolute(input) ? input : path.join(cwd, input);
+  const defsFile = await import(theFile);
   for (const i in defsFile) {
     console.log(`Loaded ${i}`);
   }
