@@ -31,7 +31,7 @@ export enum TypeId {
   SEnum = '$',
 }
 
-export type Of<T> = { [key: string]: T };
+export type Of<T> = Record<string, T>;
 
 // Simple Types:
 export type Str = TypeId.Str;
