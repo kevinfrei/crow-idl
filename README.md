@@ -5,10 +5,10 @@ involve both)
 
 ## crow-idl
 
-A very restrictive IDL for generating types in C++ and Typescript with to/from
-[CrowCpp](https://crowcpp.org)'s JSON types.
+An _intentionally restrictive_ IDL for generating types in C++ and Typescript with
+support for automatic converson to and from [CrowCpp](https://crowcpp.org)'s JSON types.
 
-Just use it by running
+Use it by running
 
 ```shell
 bunx --package="@freik/ts-cpp-tooling" crow-idl <args>
@@ -20,19 +20,18 @@ or
 npx --package="@freik/ts-cpp-tooling" crow-idl <args>
 ```
 
-This is actually actively in use by my
-[Cassette Music Player](https://github.com/kevinfrei/cassette) project.
+This is mostly just used by [Cuark](https://github.com/kevinfrei/cuark) for creation
+of light-weight web-UI, local logic apps (instead of Electron). I'm using Cuark for my
+[Cassette Music Player](https://github.com/kevinfrei/cassette) project, currently.
 
 Basically, you define your types (in a simple Typescript-hosted IDL) and
 `crow-idl` will generate both Typescript and C++ files for marshalling &
 unmarshalling the types as CrowCpp's JSON types.
 
-- [ ] Document the command line better. It's not complicated, but it's not
-      obvious, either.
+### The types:
 
-- [ ] Switch this over to the JSON stuff that my friend built in his Crow
-      project, because it's pretty cool (and a lot better than Crow's stuff). Or
-      maybe just add his stuff as a possible target option?
+This supports all the std:: integer types. Note that 64 bit values translate to JavaScript BigInt values (because
+that's what's necessary). It also supports strings, 'simple' objects, arrays (as std::vectors), tuples, optional fields (as std::optional<T>'s), and maps and sets (as either std::map/std::set or std::unordered_map/std::unordered_set).
 
 Notes:
 
@@ -42,6 +41,15 @@ Notes:
 
 - 'opt' types don't really nest. An opt to an opt to an opt (should) flatten
   out.
+
+### TODO's
+
+- [ ] Document the core IDL. Current examples are insufficient.
+
+- [ ] Document the command line better. It's not complicated, but it's not
+      obvious, either.
+
+- [ ] Add support for a different JSON library, because Crow's JSON library leaves a lot to be desired
 
 ## ts-class-graph
 
