@@ -514,6 +514,7 @@ ${[...headers]
   .sort()
   .map((nm) => `#include <${nm}>`)
   .join('\n')}
+  
 #include <crow/json.h>
 
 ${crow_header.replace(/@@@HEADER_NAME@@@/g, `${namespace}_pickling)}`)}`,
