@@ -3,7 +3,6 @@ import { $ } from 'bun';
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import ts from 'typescript';
 
-import { GetTypescriptGenerator } from '../emitters/typescript';
 import {
   arr,
   bool,
@@ -27,12 +26,13 @@ import {
   str,
   sub,
   tup,
+  Types,
   u16,
   u32,
   u64,
   u8,
-} from '../IDL';
-import type { Types } from '../types';
+} from '../../../IDL';
+import { GetTypescriptGenerator } from '../emitters/typescript';
 
 const cppOutFileName = '__test__gen.hpp';
 const tsOutFileName = '__test__gen.ts';

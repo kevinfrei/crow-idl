@@ -1,3 +1,11 @@
+import type {
+  CodeGenerator,
+  EmitItem,
+  Emitter,
+  FileGenerator,
+  IdlGenerator,
+  Types,
+} from '../../../IDL';
 import {
   isArrayType,
   isFastMapType,
@@ -12,15 +20,7 @@ import {
   isStringType,
   isSubType,
   isTupleType,
-} from '../IDL';
-import type {
-  CodeGenerator,
-  EmitItem,
-  Emitter,
-  FileGenerator,
-  IdlGenerator,
-  Types,
-} from '../types';
+} from '../typechecks';
 
 function forElement<T extends Types>(emit: Emitter, adt: T): EmitItem<T> {
   // Returns the type emitter for the given ADT

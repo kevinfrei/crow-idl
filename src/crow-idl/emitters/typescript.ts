@@ -1,4 +1,14 @@
 import * as prettier from 'prettier';
+import type {
+  Emitter,
+  Enum,
+  IdlGenerator,
+  NEnum,
+  ObjType,
+  SEnum,
+  SubType,
+  Types,
+} from '../../../IDL';
 import {
   isAnonymousType,
   isArrayType,
@@ -22,17 +32,7 @@ import {
   isU32Type,
   isU64Type,
   isU8Type,
-} from '../IDL';
-import type {
-  Emitter,
-  Enum,
-  IdlGenerator,
-  NEnum,
-  ObjType,
-  SEnum,
-  SubType,
-  Types,
-} from '../types';
+} from '../typechecks';
 import { MakeGenerator } from './api';
 
 const typeMap: Map<string, Types> = new Map();

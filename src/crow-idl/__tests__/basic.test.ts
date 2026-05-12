@@ -1,11 +1,10 @@
 import { $ } from 'bun';
 import { afterAll, beforeAll, describe, expect, it, test } from 'bun:test';
-import { GetCppGenerator } from '../emitters/cpp';
-import { GetTypescriptGenerator } from '../emitters/typescript';
 import {
   arr,
   bool,
   chr,
+  CodeGenerator,
   dbl,
   enum_lst,
   enum_num,
@@ -25,12 +24,14 @@ import {
   str,
   sub,
   tup,
+  Types,
   u16,
   u32,
   u64,
   u8,
-} from '../IDL';
-import type { CodeGenerator, Types } from '../types';
+} from '../../../IDL';
+import { GetCppGenerator } from '../emitters/cpp';
+import { GetTypescriptGenerator } from '../emitters/typescript';
 
 const cppOutFileName = '__test__outputFile.hpp';
 const tsOutFileName = '__test__outputFile.ts';

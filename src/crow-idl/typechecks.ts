@@ -45,7 +45,7 @@ import {
   type U32,
   type U64,
   type U8,
-} from './types';
+} from './../../IDL';
 
 export const str = (): Str => TypeId.Str;
 export const chr = (): Char => TypeId.Char;

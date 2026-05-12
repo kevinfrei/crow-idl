@@ -1,3 +1,15 @@
+import { promises as fsp } from 'fs';
+import type {
+  Emitter,
+  Enum,
+  IdlGenerator,
+  NEnum,
+  ObjType,
+  OptType,
+  SEnum,
+  SubType,
+  Types,
+} from '../../../IDL';
 import {
   isArrayType,
   isBoolType,
@@ -21,22 +33,14 @@ import {
   isU32Type,
   isU64Type,
   isU8Type,
-} from '../IDL';
-import type {
-  Emitter,
-  Enum,
-  IdlGenerator,
-  NEnum,
-  ObjType,
-  OptType,
-  SEnum,
-  SubType,
-  Types,
-} from '../types';
+} from '../typechecks';
 import { MakeGenerator } from './api';
+
+import crow_header from './crow_header.hpp' with { type: 'text' };
 
 let sourceFileName = 'unknown.ts';
 let namespace = 'Shared';
+let headerFileName = '';
 
 function setInputFilename(fileName: string): void {
   sourceFileName = fileName;
@@ -44,17 +48,39 @@ function setInputFilename(fileName: string): void {
 
 function setOutputFilename(/*fileName: string*/): void {}
 
-function setAdditionalOptions(opts: Record<string, string>): void {
-  if (opts.namespace) {
-    setNamespace(opts.namespace);
-  }
-}
-
 function setNamespace(ns: string): void {
   namespace = ns;
 }
 
-const headers: Set<string> = new Set(['cstdint', 'optional', 'string_view']);
+function setHeader(header: string): void {
+  headerFileName = header;
+}
+
+function setAdditionalOptions(opts: Record<string, string>): void {
+  if (opts.namespace) {
+    setNamespace(opts.namespace);
+  }
+  if (opts.header) {
+    setHeader(opts.header);
+  }
+}
+
+const headers: Set<string> = new Set([
+  'cstdint',
+  'cstddef',
+  'iomanip',
+  'map',
+  'optional',
+  'set',
+  'sstream',
+  'string',
+  'string_view',
+  'tuple',
+  'type_traits',
+  'unordered_map',
+  'unordered_set',
+  'vector',
+]);
 
 function generateHeader(): string[] {
   return `#pragma once
@@ -74,8 +100,9 @@ ${[...headers]
 
 #include <crow/json.h>
 
-// TODO: Inline this?
-#include "json_pickling.hpp"
+// TODO: Configure this header to be an external blob
+${headerFileName.length > 0 ? `#include "${headerFileName}"` : crow_header.replace(/@@@HEADER_NAME@@@/g, `${namespace}_pickling`)}
+// TODO: End Configure this header to be an external blob
 
 namespace ${namespace} {
 
@@ -129,22 +156,16 @@ function getTypeName(type: Types, scoped?: boolean): string {
   } else if (isRefType(type)) {
     return scoped ? `${namespace}::${type.r}` : type.r; // Reference type, just return the name
   } else if (isArrayType(type)) {
-    headers.add('vector');
     return `std::vector<${getTypeName(type.d, !!scoped)}>`;
   } else if (isSetType(type)) {
-    headers.add('set');
     return `std::set<${getTypeName(type.d, !!scoped)}>`;
   } else if (isFastSetType(type)) {
-    headers.add('unordered_set');
     return `std::unordered_set<${getTypeName(type.d, !!scoped)}>`;
   } else if (isMapType(type)) {
-    headers.add('map');
     return `std::map<${getTypeName(type.k, !!scoped)}, ${getTypeName(type.v, !!scoped)}>`;
   } else if (isFastMapType(type)) {
-    headers.add('unordered_map');
     return `std::unordered_map<${getTypeName(type.k, !!scoped)}, ${getTypeName(type.v, !!scoped)}>`;
   } else if (isTupleType(type)) {
-    headers.add('tuple');
     return `std::tuple<${type.l.map((a) => getTypeName(a, !!scoped)).join(', ')}>`;
   } else if (isOptionalType(type)) {
     return `std::optional<${getTypeName(type.d, !!scoped)}>`;
@@ -481,6 +502,26 @@ function usingType(name: string, item: Types): string[] {
   return [`using ${name} = ${getTypeName(item)};`];
 }
 
+async function postProcess(code: string[]): Promise<string[]> {
+  if (headerFileName.length > 0) {
+    // For now, just write the header to the file:
+    // Gotta use Node file stuff, because this thing may be running in either Bun or Node:
+    await fsp.writeFile(
+      headerFileName,
+      `#pragma once
+
+${[...headers]
+  .sort()
+  .map((nm) => `#include <${nm}>`)
+  .join('\n')}
+#include <crow/json.h>
+
+${crow_header.replace(/@@@HEADER_NAME@@@/g, `${namespace}_pickling)}`)}`,
+    );
+  }
+  return code;
+}
+
 export const CppEmitter: Emitter = {
   setInputFilename,
   setOutputFilename,
@@ -503,9 +544,16 @@ export const CppEmitter: Emitter = {
     tupType: usingType,
     strType: usingType,
   },
+  postProcess,
 };
 
-export function GetCppGenerator(): IdlGenerator {
+export function GetCppGenerator(
+  options?: Record<string, string>,
+): IdlGenerator {
   // Returns the CppEmitter instance
+  const emit = CppEmitter;
+  if (options) {
+    emit.setAdditionalOptions(options);
+  }
   return MakeGenerator(CppEmitter);
 }

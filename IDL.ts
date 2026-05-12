@@ -1,3 +1,6 @@
+// My silly IDL is actually just a set of functions that can be interpreted
+// by a script to create types for the data structures.
+
 // These could be longer & more descriptive, but I'm using indexOf into a
 // substring to check for a set of different types, and that's super easy.
 // It's cheating, but easy.
@@ -132,3 +135,100 @@ export type IdlGenerator = {
   code: CodeGenerator;
   file: FileGenerator;
 };
+
+export const str = (): Str => TypeId.Str;
+export const chr = (): Char => TypeId.Char;
+export const u8 = (): U8 => TypeId.U8;
+export const i8 = (): I8 => TypeId.I8;
+export const u16 = (): U16 => TypeId.U16;
+export const i16 = (): I16 => TypeId.I16;
+export const u32 = (): U32 => TypeId.U32;
+export const i32 = (): I32 => TypeId.I32;
+export const u64 = (): U64 => TypeId.U64;
+export const i64 = (): I64 => TypeId.I64;
+export const num = (): I => TypeId.I; // This is just used for Enum types
+export const bool = (): Bool => TypeId.Bool;
+export const flt = (): Flt => TypeId.Flt;
+export const dbl = (): Dbl => TypeId.Dbl;
+export const arr = (d: Anonymous): ArrType => ({ t: TypeId.Arr, d });
+export const set = (d: Anonymous): SetType => ({ t: TypeId.Set, d });
+export const fset = (d: Anonymous): FastSetType => ({ t: TypeId.FastSet, d });
+export const map = (k: Anonymous, v: Anonymous): MapType => ({
+  t: TypeId.Map,
+  k,
+  v,
+});
+export const fmap = (k: Anonymous, v: Anonymous): FastMapType => ({
+  t: TypeId.FastMap,
+  k,
+  v,
+});
+export const tup = (...l: Anonymous[]): TupType => ({ t: TypeId.Tup, l });
+export const obj = (d: Of<Anonymous>): ObjType => ({ t: TypeId.Obj, d });
+export const opt = (d: Types): OptType => ({ t: TypeId.Opt, d });
+export const sub = (p: string, d: Of<Anonymous>): SubType => ({
+  t: TypeId.Sub,
+  p,
+  d,
+});
+export const ref = (r: string): RefType => ({ t: TypeId.Ref, r });
+export const enum_lst = (u: Int | I, v: string[]): Enum => ({
+  t: TypeId.Enum,
+  u,
+  v,
+});
+export const enum_num = (u: Int | I, v: Of<number>): NEnum => ({
+  t: TypeId.NEnum,
+  u,
+  v,
+});
+export const enum_str = (v: Of<string>): SEnum => ({ t: TypeId.SEnum, v });
+
+// An example of how to define types using the IDL:
+/*
+const ExampleEnum1 = enum_lst(u8(), ['one', 'two', 'three']);
+const ExampleEnum2 = enum_num(num(), { one: 1, two: 2, tre: 3 });
+const ExampleEnum3 = enum_str({
+  Red: 'red',
+  Green: 'green',
+  Blue: 'blue',
+});
+const ExampleObjectType = obj({
+  name: str(),
+  age: i32(),
+  isActive: bool(),
+  scores: arr(i32()),
+  metadata: ref('Metadata'),
+  friends: set(str()),
+  info: map(str(), ref('ExampleTupleType')),
+  id: ref('ExampleEnum1'),
+});
+
+const ExampleTupleType_otherName = tup(str(), i32(), bool());
+const ExampleArrayType = arr(ref('ExampleObjectType'));
+const ExampleNestedObjectType = obj({
+  id: str(),
+  data: ref('ExampleTupleType'),
+});
+const ExampleObjectTupleType = tup(
+  ref('ExampleNestedObjectType1'),
+  ref('ExampleNestedObjectType2'),
+);
+const ExampleNestedObjectType1 = obj({ id: str(), value: i32() });
+const ExampleNestedObjectType2 = obj({ id: str(), value: dbl() });
+
+export const TypesToGenerate: SymbolList = {
+  ExampleEnum1,
+  ExampleEnum2,
+  ExampleEnum3,
+  // Inlined type for Metadata:
+  Metadata: obj({ author: str(), angle: dbl() }),
+  ExampleTupleType: ExampleTupleType_otherName,
+  ExampleObjectType,
+  ExampleArrayType,
+  ExampleNestedObjectType,
+  ExampleNestedObjectType1,
+  ExampleNestedObjectType2,
+  ExampleObjectTupleType,
+};
+*/

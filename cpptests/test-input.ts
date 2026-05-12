@@ -22,12 +22,12 @@ import {
   str,
   sub,
   tup,
+  Types,
   u16,
   u32,
   u64,
   u8,
-} from '../src/crow-idl/IDL';
-import { Types } from '../src/crow-idl/types';
+} from '../IDL';
 
 export const TypesToGenerate: Record<string, Types> = {
   MyI8: i8(),
