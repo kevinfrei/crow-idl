@@ -19,7 +19,7 @@
     "cpp": "cd cpptests && cmake --build Debug && cd Debug/tests && ctest --output-on-failure",
     "typechk": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "bld": "tsc && bun build --outdir build ./index.ts ./src/crow-idl.ts ./src/ts-class-graph.ts --minify --external typescript --external prettier --external @freik/typechk --external ts-morph",
+    "bld": "tsc && bun build --outdir build ./index.ts ./src/crow-idl.ts ./src/ts-class-graph.ts --external typescript --external prettier --external @freik/typechk --external ts-morph",
     "lint": "eslint --ext .ts src --fix",
     "justtest": "bun test",
     "testcpp": "bun run testgen && bun run format && bun run cfg && bun run cpp",

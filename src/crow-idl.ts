@@ -1,9 +1,9 @@
 #!/usr/bin/env bun
 import { chkRecordOf, isString } from '@freik/typechk';
+import path from 'node:path';
 import { isTypes } from './crow-idl/IDL';
 import { GetCppGenerator } from './crow-idl/emitters/cpp';
 import { GetTypescriptGenerator } from './crow-idl/emitters/typescript';
-import path from 'node:path';
 
 function err(message: string): void {
   console.error(`Error: ${message}`);
