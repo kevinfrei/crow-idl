@@ -1,20 +1,3 @@
-#pragma once
-
-#include <cstdint>
-#include <iomanip>
-#include <map>
-#include <optional>
-#include <set>
-#include <sstream>
-#include <string>
-#include <string_view>
-#include <tuple>
-#include <type_traits>
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
-
-#include <crow/json.h>
 
 /****
 Conversion to JSON stuff

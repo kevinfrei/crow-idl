@@ -1,4 +1,7 @@
+[install]
+globalStore = true
+[run]
+noOrphans = true
 [test]
 coverage = true
 coverageSkipTestFiles = true
-

@@ -14,7 +14,7 @@
     // "verbatimModuleSyntax": true,
     "declaration": true,
     "emitDeclarationOnly": true,
-    "outFile": "./build/index.d.ts",
+    "declarationDir": "./build",
 
     // Best practices
     "strict": true,
@@ -28,6 +28,6 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
   },
-  "include": ["index.ts", "src/**/*.ts"],
-  "exclude": ["src/__tests__/*"]
+  "include": ["index.ts", "IDL.ts", "src/**/*.ts", "src/types.d.ts"],
+  "exclude": ["src/crow-idl/__tests__/*", "cpptests/*"]
 }

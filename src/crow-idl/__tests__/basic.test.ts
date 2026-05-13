@@ -1,11 +1,10 @@
 import { $ } from 'bun';
 import { afterAll, beforeAll, describe, expect, it, test } from 'bun:test';
-import { GetCppGenerator } from '../emitters/cpp';
-import { GetTypescriptGenerator } from '../emitters/typescript';
 import {
   arr,
   bool,
   chr,
+  CodeGenerator,
   dbl,
   enum_lst,
   enum_num,
@@ -25,18 +24,21 @@ import {
   str,
   sub,
   tup,
+  Types,
   u16,
   u32,
   u64,
   u8,
-} from '../IDL';
-import type { CodeGenerator, Types } from '../types';
+} from '../../../IDL';
+import { GetCppGenerator } from '../emitters/cpp';
+import { GetTypescriptGenerator } from '../emitters/typescript';
 
 const cppOutFileName = '__test__outputFile.hpp';
 const tsOutFileName = '__test__outputFile.ts';
+const headerFileName = 'json_header.hpp';
 
 async function fileCleanup() {
-  await $`rm -rf ${cppOutFileName} ${tsOutFileName}`;
+  await $`rm -rf ${cppOutFileName} ${tsOutFileName} ${headerFileName}`;
 }
 
 beforeAll(fileCleanup);
@@ -220,23 +222,50 @@ describe('Typescript codegen expectations', () => {
 describe('C++ codegen expectations', () => {
   it('Simple types', async () => {
     const deform = await cleanCode(
-      GetCppGenerator().code,
+      GetCppGenerator({ header: headerFileName }).code,
       'outputFile.hpp',
       simpleTypes,
     );
-    expect(deform.indexOf('using MyI8 = std::int8_t;')).toBeGreaterThan(0);
-    expect(deform.indexOf('using MyI16 = std::int16_t;')).toBeGreaterThan(0);
-    expect(deform.indexOf('using MyI32 = std::int32_t;')).toBeGreaterThan(0);
-    expect(deform.indexOf('using MyI64 = std::int64_t;')).toBeGreaterThan(0);
-    expect(deform.indexOf('using MyU8 = std::uint8_t;')).toBeGreaterThan(0);
-    expect(deform.indexOf('using MyU16 = std::uint16_t;')).toBeGreaterThan(0);
-    expect(deform.indexOf('using MyU32 = std::uint32_t;')).toBeGreaterThan(0);
-    expect(deform.indexOf('using MyU64 = std::uint64_t;')).toBeGreaterThan(0);
-    expect(deform.indexOf('using MyFloat = float;')).toBeGreaterThan(0);
-    expect(deform.indexOf('using MyDouble = double;')).toBeGreaterThan(0);
-    expect(deform.indexOf('using MyString = std::string;')).toBeGreaterThan(0);
-    expect(deform.indexOf('using MyBoolean = bool;')).toBeGreaterThan(0);
-    expect(deform.indexOf('using MyChar = char;')).toBeGreaterThan(0);
+    let index = deform.indexOf(`#include "${headerFileName}"`);
+    expect(index).toBeGreaterThan(0);
+    let nextIndex = deform.indexOf('using MyI8 = std::int8_t;');
+    expect(nextIndex).toBeGreaterThan(index);
+    index = nextIndex;
+    nextIndex = deform.indexOf('using MyI16 = std::int16_t;');
+    expect(nextIndex).toBeGreaterThan(index);
+    index = nextIndex;
+    nextIndex = deform.indexOf('using MyI32 = std::int32_t;');
+    expect(nextIndex).toBeGreaterThan(index);
+    index = nextIndex;
+    nextIndex = deform.indexOf('using MyI64 = std::int64_t;');
+    expect(nextIndex).toBeGreaterThan(index);
+    index = nextIndex;
+    nextIndex = deform.indexOf('using MyU8 = std::uint8_t;');
+    expect(nextIndex).toBeGreaterThan(index);
+    index = nextIndex;
+    nextIndex = deform.indexOf('using MyU16 = std::uint16_t;');
+    expect(nextIndex).toBeGreaterThan(index);
+    index = nextIndex;
+    nextIndex = deform.indexOf('using MyU32 = std::uint32_t;');
+    expect(nextIndex).toBeGreaterThan(index);
+    index = nextIndex;
+    nextIndex = deform.indexOf('using MyU64 = std::uint64_t;');
+    expect(nextIndex).toBeGreaterThan(index);
+    index = nextIndex;
+    nextIndex = deform.indexOf('using MyFloat = float;');
+    expect(nextIndex).toBeGreaterThan(index);
+    index = nextIndex;
+    nextIndex = deform.indexOf('using MyDouble = double;');
+    expect(nextIndex).toBeGreaterThan(index);
+    index = nextIndex;
+    nextIndex = deform.indexOf('using MyString = std::string;');
+    expect(nextIndex).toBeGreaterThan(index);
+    index = nextIndex;
+    nextIndex = deform.indexOf('using MyBoolean = bool;');
+    expect(nextIndex).toBeGreaterThan(index);
+    index = nextIndex;
+    nextIndex = deform.indexOf('using MyChar = char;');
+    expect(nextIndex).toBeGreaterThan(index);
   });
   it('Collection types', async () => {
     const deform = await cleanCode(

@@ -7,7 +7,7 @@
 #include <gtest/gtest.h>
 
 #include "gen.hpp"
-#include "json_pickling.hpp"
+// #include "json_pickling.hpp"
 
 TEST(JsonPickling, uint32) {
   // Test the conversion of basic types to and from JSON
