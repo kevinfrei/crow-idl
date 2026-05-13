@@ -1,12 +1,22 @@
 {
   "name": "@freik/ts-cpp-tooling",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "A simple IDL for use with CrowCpp (C++) and TypeScript",
   "module": "build/index.js",
   "type": "module",
   "files": [
     "build"
   ],
+  "exports": {
+    ".": {
+      "types": "./build/index.d.ts",
+      "import": "./build/index.js"
+    },
+    "./IDL": {
+      "types": "./build/IDL.d.ts",
+      "import": "./build/IDL.js"
+    }
+  },
   "types": "build/src/index.d.ts",
   "bin": {
     "crow-idl": "build/src/crow-idl.js",
