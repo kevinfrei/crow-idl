@@ -1,3 +1,4 @@
+import { promises as fsp } from 'node:fs';
 import type {
   CodeGenerator,
   EmitItem,
@@ -15,6 +16,7 @@ import {
   isObjectType,
   isOptionalType,
   isPlainEnumType,
+  isRefType,
   isSetType,
   isStringEnumType,
   isStringType,
@@ -22,11 +24,49 @@ import {
   isTupleType,
 } from '../typechecks';
 
-function forElement<T extends Types>(emit: Emitter, adt: T): EmitItem<T> {
-  // Returns the type emitter for the given ADT
+// Fully resolve a reference type to its underlying type, throwing an error if
+// the reference is invalid or if it references an optional type (which is not allowed).
+function getReferencedType(ref: string, item_map: Map<string, Types>): Types {
+  let refType: Types | undefined = undefined;
+  let curRef = ref;
+  do {
+    refType = item_map.get(curRef);
+    if (refType) {
+      if (isOptionalType(refType)) {
+        throw new Error(
+          `Cannot reference an optional type ${curRef} (started from ${ref})`,
+        );
+      } else if (isRefType(refType)) {
+        curRef = refType.r;
+      }
+    } else {
+      throw new Error(
+        `Reference to unknown type ${curRef} (started from ${ref})`,
+      );
+    }
+  } while (isRefType(refType));
+  return refType;
+}
+
+function forElement<T extends Types>(
+  emit: Emitter,
+  adt: T,
+  item_map: Map<string, Types>,
+): EmitItem<T> {
+  // Do some sanity checks, and then return the type emitter for the given ADT
+  if (isRefType(adt)) {
+    // This triggers a full lookup
+    getReferencedType(adt.r, item_map);
+  }
   if (isObjectType(adt)) {
     return emit.types.objType as EmitItem<T>;
   } else if (isSubType(adt)) {
+    let parentType = getReferencedType(adt.p, item_map)!;
+    if (!isObjectType(parentType) && !isSubType(parentType)) {
+      throw new Error(
+        `Subtype's parent type ${adt.p} eventual target is is not a valid object or subtype`,
+      );
+    }
     return emit.types.subType as EmitItem<T>;
   } else if (isArrayType(adt)) {
     return emit.types.arrType as EmitItem<T>;
@@ -60,9 +100,10 @@ async function generateCode(
   items: Record<string, Types>,
 ): Promise<string[]> {
   const body: string[] = [];
-  for (const [name, item] of Object.entries(items)) {
-    // Emit the C++ code for each SharedConstants item, either numeric or string type
-    const itemEmitter = forElement(emitter, item);
+  const item_map = new Map<string, Types>(Object.entries(items));
+  for (const [name, item] of item_map) {
+    // Emit the generated code for each item
+    const itemEmitter = forElement(emitter, item, item_map);
     body.push(...itemEmitter(name, item));
   }
   const header = emitter.generateHeader();
@@ -80,7 +121,7 @@ async function emitCode(
   items: Record<string, Types>,
 ): Promise<void> {
   const code = await generateCode(emitter, items);
-  await Bun.write(fileName, code.join('\n'));
+  await fsp.writeFile(fileName, code.join('\n'));
 }
 
 export function MakeGenerator(emitter: Emitter): IdlGenerator {

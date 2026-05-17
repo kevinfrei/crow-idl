@@ -172,17 +172,68 @@ export const sub = (p: string, d: Of<Anonymous>): SubType => ({
   d,
 });
 export const ref = (r: string): RefType => ({ t: TypeId.Ref, r });
-export const enum_lst = (u: Int | I, v: string[]): Enum => ({
-  t: TypeId.Enum,
-  u,
+export function enum_lst(u: Int | I, v: string[]): Enum {
+  // Let's make sure we have the range for the number of elements, if the element
+  // type is a 8 or 16 bit type.
+  if (u === TypeId.U8 || u === TypeId.I8) {
+    if (v.length > 256) {
+      throw new Error(
+        `Enum with u8 underlying type cannot have more than 256 values, got ${v.length}`,
+      );
+    }
+  } else if (u === TypeId.U16 || u === TypeId.I16) {
+    if (v.length > 65536) {
+      throw new Error(
+        `Enum with u16 underlying type cannot have more than 65536 values, got ${v.length}`,
+      );
+    }
+  }
+  return {
+    t: TypeId.Enum,
+    u,
+    v,
+  };
+}
+export function enum_num(u: Int | I, v: Of<number>): NEnum {
+  // Let's make sure we have the range for the number of elements, if the element
+  // type is a 8 or 16 bit type.
+  const range =
+    u === TypeId.U8 || u === TypeId.I8
+      ? 256
+      : u === TypeId.U16 || u === TypeId.I16
+        ? 65536
+        : Infinity;
+  const low =
+    u === TypeId.U8
+      ? 0
+      : u === TypeId.I8
+        ? -128
+        : u === TypeId.U16
+          ? 0
+          : u === TypeId.I16
+            ? -32768
+            : Number.MIN_SAFE_INTEGER;
+  Object.values(v).forEach((num) => {
+    if (typeof num !== 'number' || !Number.isInteger(num)) {
+      throw new Error(`Enum values must be integers, got ${num}`);
+    }
+    if (num < low || num >= low + range) {
+      throw new Error(
+        `Enum value ${num} is out of range for underlying type ${u}`,
+      );
+    }
+  });
+  return {
+    t: TypeId.NEnum,
+    u,
+    v,
+  };
+}
+
+export const enum_str = (v: Of<string>): SEnum => ({
+  t: TypeId.SEnum,
   v,
 });
-export const enum_num = (u: Int | I, v: Of<number>): NEnum => ({
-  t: TypeId.NEnum,
-  u,
-  v,
-});
-export const enum_str = (v: Of<string>): SEnum => ({ t: TypeId.SEnum, v });
 
 // An example of how to define types using the IDL:
 /*
