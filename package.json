@@ -1,6 +1,6 @@
 {
   "name": "@freik/ts-cpp-tooling",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "A simple IDL for use with CrowCpp (C++) and TypeScript",
   "module": "build/index.js",
   "type": "module",
