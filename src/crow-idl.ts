@@ -9,17 +9,30 @@ function err(message: string): void {
   console.error(`Error: ${message}`);
   console.error(`Usage:
   bun scripts/gen.ts <definitions.ts> <output specifiers>
-    "definitions.ts" must contain a SymbolList export called TypesToGenerate
-    output specifiers:
-      --cpp:<cppheader.h> (or -c:<cppheader.h>)
-      --ts:<tsoutput.ts> (or -t:<tsoutput.ts>)
-      OPTIONAL:
-      --hpp:<commonheader.hpp> (or -h:<commonheader.hpp>)
-        This specifies where to emit the common header necessary to
-        interoperate with the generated C++ code. If not specified, the common
-        header will be emitted directly into the generated cpp header file. If
-        you specify a separate common header, it will be emitted there instead,
-        and the generated cpp header will #include it.\n`);
+    
+    * "definitions.ts" must contain a SymbolList export called TypesToGenerate.
+
+    * You can only emit one of the C++ output types. Emitting both a module
+      interface and a cpp header is not supported.
+
+    * output specifiers:
+        --mod:<cppmodule.cppm,shared_module.cppm>
+            (or -m:<cppmodule.cppm,shared_module.cppm>)
+          The names of the C++ module interface files to generate.
+          If the shared_module.cppm files is not specified, it will not be
+          generated, but will still be imported under the module import usage
+          "import pickling_support;".
+        --cpp:<cppheader.h> (or -c:<cppheader.h>)
+        --ts:<tsoutput.ts> (or -t:<tsoutput.ts>)
+      OPTIONAL (with -cpp/-c):
+        --hpp:<commonheader.hpp> (or -h:<commonheader.hpp>)
+          This specifies where to emit the common header necessary to
+          interoperate with the generated C++ *header* code. If not specified,
+          the common header will be emitted directly into the generated cpp
+          header file. If you specify a separate common header, it will be
+          emitted there instead, and the generated cpp header will #include
+          it.
+`);
 }
 
 // The first argument is the definition file
@@ -28,6 +41,7 @@ function err(message: string): void {
 // --cpp:<file> or -c: (or --cpp/-c <file>)
 // --ts:<file>  of -t: (or --ts/t <file>)
 // --hpp:<file> or -h: (or --hpp/-h <file>)
+// --mod:<file.cppm,shared_module.cppm> or -m (or --mod <file1,file2>)
 export async function main(input: string, ...args: string[]): Promise<void> {
   const theFile = pathToFileURL(input).toString();
   console.log('Importing definitions from', theFile);
