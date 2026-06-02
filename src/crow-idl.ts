@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
-import { chkRecordOf, isString } from '@freik/typechk';
-import { pathToFileURL } from 'bun';
+import { chkRecordOf, isString, isUndefined } from '@freik/typechk';
+import { pathToFileURL } from 'node:url';
 import { GetCppGenerator } from './crow-idl/emitters/cpp';
 import { GetTypescriptGenerator } from './crow-idl/emitters/typescript';
 import { isTypes } from './crow-idl/typechecks';
@@ -21,7 +21,7 @@ function err(message: string): void {
           The names of the C++ module interface files to generate.
           If the shared_module.cppm files is not specified, it will not be
           generated, but will still be imported under the module import usage
-          "import pickling_support;".
+          "import <TODO:pickling_support_module_name>;".
         --cpp:<cppheader.h> (or -c:<cppheader.h>)
         --ts:<tsoutput.ts> (or -t:<tsoutput.ts>)
       OPTIONAL (with -cpp/-c):
@@ -33,6 +33,19 @@ function err(message: string): void {
           emitted there instead, and the generated cpp header will #include
           it.
 `);
+}
+
+function getModuleSpecifier(arg: string, val: string | undefined): [string] | [string, string] {
+  if (isUndefined(val)) {
+    err(`Expected module output specifier after ${arg}, but got undefined`);
+    process.exit(1);
+  }
+  const maybeModFiles = val.split(',');
+  if (maybeModFiles.length < 1 || maybeModFiles.length > 2 || maybeModFiles.some(f => !f)) {
+    err(`Invalid module output specifier: ${val}`);
+    process.exit(1);
+  }
+  return maybeModFiles as [string] | [string, string];
 }
 
 // The first argument is the definition file
@@ -58,12 +71,12 @@ export async function main(input: string, ...args: string[]): Promise<void> {
   let cppFile: string | undefined;
   let tsFile: string | undefined;
   let hppFile: string | undefined;
+  let modFiles: [string] | [string, string] | undefined;
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
     if (!isString(arg)) {
-      err(`Argument ${i} is not a string: ${arg}`);
-      process.exit(1);
+      throw new Error(`Argument ${i} is not a string: ${arg}`);
     }
     if (arg.startsWith('--cpp:')) {
       cppFile = arg.substring(6);
@@ -77,6 +90,10 @@ export async function main(input: string, ...args: string[]): Promise<void> {
       hppFile = arg.substring(6);
     } else if (arg.startsWith('-h:')) {
       hppFile = arg.substring(3);
+    } else if (arg.startsWith('--mod:')) {
+      modFiles = getModuleSpecifier('--mod:', arg.substring(6));
+    } else if (arg.startsWith('--mod:')) {
+      modFiles = getModuleSpecifier('-m:', arg.substring(3));
     } else if (i + 1 < args.length) {
       if (arg === '--cpp' || arg === '-c') {
         cppFile = args[++i];
@@ -84,6 +101,8 @@ export async function main(input: string, ...args: string[]): Promise<void> {
         tsFile = args[++i];
       } else if (arg === '--hpp' || arg === '-h') {
         hppFile = args[++i];
+      } else if (arg === '--mod' || arg === '-m') {
+        modFiles = getModuleSpecifier(arg, args[++i]);
       }
     } else {
       err(`Unknown argument: ${arg}`);

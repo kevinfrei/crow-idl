@@ -2,15 +2,12 @@ import { $, BuildOutput } from 'bun';
 
 export async function WebBuild(): Promise<BuildOutput> {
   const isDebug = false;
-  await $`rm -r build/**/*.js`;
+  try {
+    await $`rm -r build/**/*.js`;
+  } catch {}
   const bunBuild = await Bun.build({
-    entrypoints: [
-      './index.ts',
-      './IDL.ts',
-      './src/crow-idl.ts',
-      './src/ts-class-graph.ts',
-    ],
-    external: ['typescript', 'prettier', '@freik/typechk', 'ts-morph'],
+    entrypoints: ['./index.ts', './IDL.ts', './src/crow-idl.ts'],
+    external: ['typescript', 'prettier', '@freik/typechk'],
     outdir: 'build',
     minify: !isDebug,
     sourcemap: isDebug ? 'inline' : 'none',
