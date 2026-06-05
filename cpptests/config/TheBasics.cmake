@@ -51,12 +51,16 @@ else()
     add_link_options(-flto)
   endif()
   # Define TARGET_OS for the OS-specific code in tools_lib
+  # Trigger CMake's module scanning:
+  set(CMAKE_CXX_SCAN_FOR_MODULES ON)
   if(APPLE)
+    # For clang, we specify where to find the std/std.compat BMI's
     add_compile_options("-fmodule-file=std=${STD_BMI_LOC}")
     add_compile_options("-fmodule-file=std.compat=${STD_COMPAT_BMI_LOC}")
     set(TARGET_OS macos)
   elseif(UNIX)
     set(TARGET_OS linux)
+    # GCC Only: This triggers old-style Clang-only modules, not C++20 modules
     add_compile_options(-fmodules)
   endif()
 endif()

@@ -5,7 +5,7 @@ import std;
 import ts_cpp_idl.crow_support;
 import ts_cpp_idl.Shared;
 
-TEST(JsonPickling, uint32) {
+TEST(JSonPicklingModule, uint32) {
   // Test the conversion of basic types to and from JSON
   crow::json::wvalue json_value = to_json(123456);
   EXPECT_EQ(json_value.t(), crow::json::type::Number);
@@ -18,7 +18,7 @@ TEST(JsonPickling, uint32) {
   EXPECT_FALSE(bool_value.has_value());
 }
 
-TEST(JsonPickling, int32) {
+TEST(JSonPicklingModule, int32) {
   // Test the conversion of basic types to and from JSON
   crow::json::wvalue json_value = to_json(-234567);
   EXPECT_EQ(json_value.t(), crow::json::type::Number);
@@ -31,7 +31,7 @@ TEST(JsonPickling, int32) {
   EXPECT_FALSE(str_val.has_value());
 }
 
-TEST(JsonPickling, uint16) {
+TEST(JSonPicklingModule, uint16) {
   // Test the conversion of basic types to and from JSON
   crow::json::wvalue json_value = to_json(12345);
   EXPECT_EQ(json_value.t(), crow::json::type::Number);
@@ -44,7 +44,7 @@ TEST(JsonPickling, uint16) {
   EXPECT_FALSE(str_val.has_value());
 }
 
-TEST(JsonPickling, int16) {
+TEST(JSonPicklingModule, int16) {
   // Test the conversion of basic types to and from JSON
   crow::json::wvalue json_value = to_json(-1234);
   EXPECT_EQ(json_value.t(), crow::json::type::Number);
@@ -57,7 +57,7 @@ TEST(JsonPickling, int16) {
   EXPECT_FALSE(str_val.has_value());
 }
 
-TEST(JsonPickling, uint8) {
+TEST(JSonPicklingModule, uint8) {
   // Test the conversion of basic types to and from JSON
   crow::json::wvalue json_value = to_json(123);
   EXPECT_EQ(json_value.t(), crow::json::type::Number);
@@ -70,7 +70,7 @@ TEST(JsonPickling, uint8) {
   EXPECT_FALSE(str_val.has_value());
 }
 
-TEST(JsonPickling, int8) {
+TEST(JSonPicklingModule, int8) {
   // Test the conversion of basic types to and from JSON
   crow::json::wvalue json_value = to_json(-12);
   EXPECT_EQ(json_value.t(), crow::json::type::Number);
@@ -83,7 +83,7 @@ TEST(JsonPickling, int8) {
   EXPECT_FALSE(str_val.has_value());
 }
 
-TEST(JsonPickling, true) {
+TEST(JSonPicklingModule, true) {
   crow::json::wvalue json_value = to_json(true);
   EXPECT_EQ(json_value.t(), crow::json::type::True);
   std::string s = json_value.dump();
@@ -95,7 +95,7 @@ TEST(JsonPickling, true) {
   EXPECT_FALSE(int_value.has_value());
 }
 
-TEST(JsonPickling, false) {
+TEST(JSonPicklingModule, false) {
   crow::json::wvalue json_value = to_json(false);
   EXPECT_EQ(json_value.t(), crow::json::type::False);
   std::string s = json_value.dump();
@@ -107,7 +107,7 @@ TEST(JsonPickling, false) {
   EXPECT_FALSE(int_value.has_value());
 }
 
-TEST(JsonPickling, double) {
+TEST(JSonPicklingModule, double) {
   // Test the conversion of basic types to and from JSON
   crow::json::wvalue json_value = to_json(1.25);
   EXPECT_EQ(json_value.t(), crow::json::type::Number);
@@ -120,7 +120,7 @@ TEST(JsonPickling, double) {
   EXPECT_FALSE(int_value.has_value());
 }
 
-TEST(JsonPickling, float) {
+TEST(JSonPicklingModule, float) {
   // Test the conversion of basic types to and from JSON
   crow::json::wvalue json_value = to_json(1.25f);
   EXPECT_EQ(json_value.t(), crow::json::type::Number);
@@ -133,7 +133,7 @@ TEST(JsonPickling, float) {
   EXPECT_FALSE(int_value.has_value());
 }
 
-TEST(JsonPickling, c_string) {
+TEST(JSonPicklingModule, c_string) {
   // Test the conversion of basic types to and from JSON
   crow::json::wvalue json_value = to_json("hello");
   EXPECT_EQ(json_value.t(), crow::json::type::String);
@@ -146,7 +146,7 @@ TEST(JsonPickling, c_string) {
   EXPECT_FALSE(int_value.has_value());
 }
 
-TEST(JsonPickling, std_string) {
+TEST(JSonPicklingModule, std_string) {
   // Test the conversion of basic types to and from JSON
   crow::json::wvalue json_value = to_json(std::string("hello"));
   EXPECT_EQ(json_value.t(), crow::json::type::String);
@@ -159,7 +159,7 @@ TEST(JsonPickling, std_string) {
   EXPECT_FALSE(int_value.has_value());
 }
 
-TEST(JsonPickling, char) {
+TEST(JSonPicklingModule, char) {
   // Test the conversion of basic types to and from JSON
   crow::json::wvalue json_value = to_json('a');
   EXPECT_EQ(json_value.t(), crow::json::type::String);
@@ -172,7 +172,7 @@ TEST(JsonPickling, char) {
   EXPECT_FALSE(int_value.has_value());
 }
 
-TEST(JsonPickling, std_vector) {
+TEST(JSonPicklingModule, std_vector) {
   // Test the conversion of basic types to and from JSON
   std::vector<int> vec = {1, 2, 3};
   crow::json::wvalue json_value = to_json(vec);
@@ -190,7 +190,7 @@ TEST(JsonPickling, std_vector) {
   EXPECT_EQ(vec_value.value()[2], 3);
 }
 
-TEST(JsonPickling, std_tuple) {
+TEST(JSonPicklingModule, std_tuple) {
   // Test the conversion of basic types to and from JSON
   std::tuple<int, double, std::string> tup = {1, 2.5, "hello"};
   crow::json::wvalue json_value = to_json(tup);
@@ -261,7 +261,7 @@ void testSet(const T& theSet) {
   EXPECT_EQ(*set_val, theSet);
 }
 
-TEST(JsonPickling, std_set_and_hash) {
+TEST(JSonPicklingModule, std_set_and_hash) {
   std::set<char> theSet{'z', 'c', 'b', 'q'};
   testSet(theSet);
   std::unordered_set<char> hashSet{'c', 'b', 'q', 'z'};
@@ -291,7 +291,7 @@ void testMap(const MapType& theMap) {
   EXPECT_EQ(*map_val, theMap);
 }
 
-TEST(JsonPickling, std_map_and_hash) {
+TEST(JSonPicklingModule, std_map_and_hash) {
   std::map<std::string, int> theMap{
       {"a1", 1}, {"b2", 2}, {"c3", 3}, {"d4", 4}, {"e5", 5}};
   testMap(theMap);
@@ -302,7 +302,7 @@ TEST(JsonPickling, std_map_and_hash) {
 
 // TODO: Test the 3 different enumeration types then get a
 // struct-specific overload going
-TEST(JsonPickling, enumClass) {
+TEST(JSonPicklingModule, enumClass) {
   // Test the conversion of basic types to and from JSON
   {
     crow::json::wvalue json_value = to_json(Shared::MyEnum::a);
@@ -339,7 +339,7 @@ TEST(JsonPickling, enumClass) {
   }
 }
 
-TEST(JsonPickling, EnumAggregate) {
+TEST(JSonPicklingModule, EnumAggregate) {
   Shared::Aggregate agg{
       Shared::MyEnum::c, Shared::MyNEnum::b, Shared::MySEnum::a};
   auto json_value = to_json(agg);
@@ -352,7 +352,7 @@ TEST(JsonPickling, EnumAggregate) {
   EXPECT_EQ(agg.se, agg_value->se);
 }
 
-TEST(JsonPickling, SimpleObject) {
+TEST(JSonPicklingModule, SimpleObject) {
   Shared::MyObj obj{"hello", -42, true, std::nullopt};
   auto json_value = to_json(obj);
   std::string s = json_value.dump();
@@ -366,7 +366,7 @@ TEST(JsonPickling, SimpleObject) {
   EXPECT_FALSE(obj_value->d.has_value());
 }
 
-TEST(JsonPicking, Aggregate2) {
+TEST(JsonPicklingModule, Aggregate2) {
   Shared::MySub sub{{"parent", 21, false, std::nullopt}, "child", 10};
   Shared::Aggregate2 agg{{"string", 42, true}, sub};
   auto json_value = to_json(agg);
@@ -455,7 +455,7 @@ TEST(JsonPicking, Aggregate2) {
   EXPECT_EQ(pathroot.size(), 0);
 }
 
-TEST(JsonPickling, CustomObject) {
+TEST(JSonPicklingModule, CustomObject) {
   Shared::TranscodeState state;
   state.curStatus = "Transcoding";
   state.filesTranscoded = {"file1.mp3", "file2.mp3"};

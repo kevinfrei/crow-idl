@@ -32,7 +32,7 @@
     "build": "tsc && bun run builder.ts",
     "lint": "eslint --ext .ts src --fix",
     "justtest": "bun test",
-    "testcpp": "bun run testgen && bun run format && bun run cfg && bun run cpp",
+    "testcpp": "bun run cpp",
     "testgen": "bun run cpptests/generate.ts",
     "watch": "bun test --watch",
     "test": "bun run typechk && bun run testcpp && bun run justtest",
