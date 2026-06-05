@@ -38,13 +38,15 @@ import {
   MySEnum,
 } from '../../../cpptests/gen.ts';
 
-const BINARY_PATH = './cpptests/Debug/tests/js_cpp_xproc';
+const BINARY_PATH = './cpptests/build/Debug/tests/js_cpp_xproc';
+const BINARY_PATH_MODULE = './cpptests/build/Debug/tests/js_cpp_xproc_module';
 
 let kill_child: () => void;
 let send: (data: unknown) => Promise<unknown>;
+let use_module = true;
 
 beforeAll(() => {
-  const child = spawn(BINARY_PATH);
+  const child = spawn(use_module ? BINARY_PATH_MODULE : BINARY_PATH);
   kill_child = () => child.kill();
   const rl = readline.createInterface({ input: child.stdout });
 
