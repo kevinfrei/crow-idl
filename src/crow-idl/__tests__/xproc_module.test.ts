@@ -38,13 +38,13 @@ import {
   MySEnum,
 } from '../../../cpptests/gen.ts';
 
-const BINARY_PATH = './cpptests/build/Debug/tests/js_cpp_xproc';
+const BINARY_PATH_MODULE = './cpptests/build/Debug/tests/js_cpp_xproc_module';
 
 let kill_child: () => void;
 let send: (data: unknown) => Promise<unknown>;
 
 beforeAll(() => {
-  const child = spawn(BINARY_PATH);
+  const child = spawn(BINARY_PATH_MODULE);
   kill_child = () => child.kill();
   const rl = readline.createInterface({ input: child.stdout });
 
@@ -64,7 +64,7 @@ afterAll(() => {
   kill_child();
 });
 
-describe('C++/JS Pipe', () => {
+describe('C++Module/JS Pipe', () => {
   test('should echo back JSON data correctly', async () => {
     // This tests simple round-tripping of JSON data through the C++ process,
     // which validates that the C++ code can read and write JSON correctly.
