@@ -8,8 +8,29 @@ gtest_discover_tests(idl_testing)
 
 add_executable(js_cpp_xproc xproc_test.cpp)
 target_include_directories(js_cpp_xproc PRIVATE .. ../../build)
+
 target_link_libraries(js_cpp_xproc PUBLIC ${CROW_LIB})
 
-add_executable(idl_module_testing json_test_module.cpp)
+add_executable(idl_module_testing)
+target_sources(
+  ipc_module_testing
+  PRIVATE
+    json_test_module.cpp
+  PUBLIC
+  FILE_SET
+  CXX_MODULES
+  FILES
+    ../gen.cppm ../common.cppm
+)
 
-add_executable(js_cpp_xproc_module xproc_text_module.cpp)
+add_executable(js_cpp_xproc_module)
+target_sources(
+  js_cpp_xproc_module
+  PRIVATE
+    xproc_text_module.cpp
+  PUBLIC
+  FILE_SET
+  CXX_MODULES
+  FILES
+    ../gen.cppm ../common.cppm
+)
