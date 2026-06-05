@@ -8,13 +8,14 @@ project(crowidltest)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if(MSVC)
   # For windows/VC++, run normal exception handling & windows 10 APIs
   set(CMAKE_CXX_FLAGS "/EHsc /D_WIN32_WINNT=0x0A00 /DWINVER=0x0A00")
-  if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     # untested.
     # I wonder if RTC still works. I should use it, since I did the work:
     add_compile_options(/W4 /Od /RTC1 /D_CRT_SECURE_NO_WARNINGS)
@@ -24,7 +25,7 @@ if(MSVC)
 else()
   # For non-windows compilers, enable sanitizers and stuff
   add_compile_options(-Wpedantic -Wall -Wextra -Werror -pedantic)
-  if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_options(-O0 -g) # -fsanitize=address,undefined 
     add_link_options(-O0 -g) # -fsanitize=address,undefined 
   else()
