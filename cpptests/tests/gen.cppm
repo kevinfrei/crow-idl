@@ -12,7 +12,11 @@ module;
 
 export module ts_cpp_idl.Shared;
 import ts_cpp_idl.crow_support;
+import std;
 
+// using statements don't leak! Hurray!
+using crow::json::rvalue;
+using crow::json::wvalue;
 using std::map;
 using std::optional;
 using std::set;

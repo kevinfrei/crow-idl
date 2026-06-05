@@ -108,7 +108,7 @@ export async function main(input: string, ...args: string[]): Promise<void> {
       process.exit(1);
     }
   }
-  if (!(cppFile || modFiles) || !tsFile) {
+  if (!cppFile && !modFiles && !tsFile) {
     err('Missing an output file');
     process.exit(1);
   }
@@ -122,6 +122,7 @@ export async function main(input: string, ...args: string[]): Promise<void> {
     await CppGen.file(input, cppFile, ttg);
   }
   if (modFiles) {
+    // Generate C++ module code
     const CppGen = GetCppGenerator(
       modFiles.length === 1
         ? { module: modFiles[0] }
