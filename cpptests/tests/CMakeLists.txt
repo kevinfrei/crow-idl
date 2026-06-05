@@ -20,7 +20,6 @@ target_sources(
   FILES
     gen.cppm common.cppm
 )
-target_compile_options(idl_module_testing PRIVATE -fmodules)
 target_link_libraries(idl_module_testing PUBLIC ${CROW_LIB} ${GTEST_LIB})
 gtest_discover_tests(idl_module_testing)
 
@@ -34,5 +33,4 @@ target_sources(
   FILES
     gen.cppm common.cppm
 )
-target_compile_options(js_cpp_xproc_module PRIVATE -fmodules)
 target_link_libraries(js_cpp_xproc_module PUBLIC ${CROW_LIB})
