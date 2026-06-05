@@ -37,7 +37,7 @@ import {
 import { MakeGenerator } from './api';
 
 import crow_header from './crow_header.hpp' with { type: 'text' };
-import crow_module from './crow_module.cppm' with { type: 'text' };
+import crow_module from './tscpp_idl_crow.cppm' with { type: 'text' };
 
 let sourceFileName = 'unknown.ts';
 let namespace = 'Shared';
@@ -572,11 +572,12 @@ function usingType(name: string, item: Types): string[] {
 
 async function postProcess(code: string[]): Promise<string[]> {
   if (headerFileName.length > 0) {
-    // For now, just write the header to the file:
-    // Gotta use Node file stuff, because this thing may be running in either Bun or Node:
-    await fsp.writeFile(
-      headerFileName,
-      `#pragma once
+    if (isHdr) {
+      // For now, just write the header to the file:
+      // Gotta use Node file stuff, because this thing may be running in either Bun or Node:
+      await fsp.writeFile(
+        headerFileName,
+        `#pragma once
 
 ${[...headers]
   .sort()
@@ -586,7 +587,10 @@ ${[...headers]
 #include <crow/json.h>
 
 ${crow_header.replace(/@@@HEADER_NAME@@@/g, `${namespace}_pickling)}`)}`,
-    );
+      );
+    } else {
+      await fsp.writeFile(headerFileName, crow_module);
+    }
   }
   return code;
 }
