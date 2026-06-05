@@ -37,11 +37,25 @@
     "watch": "bun test --watch",
     "test": "bun run typechk && bun run testcpp && bun run justtest",
     "prepublishOnly": "bun run bld",
-    "prepare": "bunx simple-git-hooks"
+    "prepare": "bun simple-git-hooks"
   },
   "simple-git-hooks": {
-    "pre-commit": "bun run format",
+    "pre-commit": "bun lint-staged",
     "pre-push": "bun run test"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json}": [
+      "prettier --write"
+    ],
+    "*.cmake": [
+      "passable -i"
+    ],
+    "CMakeLists.txt": [
+      "passable -i"
+    ],
+    "*.{cpp,hpp,c,h,cc,hh,cppm}": [
+      "clang-format -i"
+    ]
   },
   "dependencies": {
     "prettier-plugin-organize-imports": "^4.3.0"
@@ -60,6 +74,7 @@
     "clang-format": "^1.8.0",
     "eslint": "^10.4.1",
     "globals": "^17.6.0",
+    "lint-staged": "^17.0.7",
     "prettier": "^3.8.3",
     "simple-git-hooks": "^2.13.1",
     "typescript": "^6.0.3",

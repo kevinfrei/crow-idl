@@ -35,13 +35,20 @@ function err(message: string): void {
 `);
 }
 
-function getModuleSpecifier(arg: string, val: string | undefined): [string] | [string, string] {
+function getModuleSpecifier(
+  arg: string,
+  val: string | undefined,
+): [string] | [string, string] {
   if (isUndefined(val)) {
     err(`Expected module output specifier after ${arg}, but got undefined`);
     process.exit(1);
   }
   const maybeModFiles = val.split(',');
-  if (maybeModFiles.length < 1 || maybeModFiles.length > 2 || maybeModFiles.some(f => !f)) {
+  if (
+    maybeModFiles.length < 1 ||
+    maybeModFiles.length > 2 ||
+    maybeModFiles.some((f) => !f)
+  ) {
     err(`Invalid module output specifier: ${val}`);
     process.exit(1);
   }
@@ -78,22 +85,14 @@ export async function main(input: string, ...args: string[]): Promise<void> {
     if (!isString(arg)) {
       throw new Error(`Argument ${i} is not a string: ${arg}`);
     }
-    if (arg.startsWith('--cpp:')) {
-      cppFile = arg.substring(6);
-    } else if (arg.startsWith('--ts:')) {
-      tsFile = arg.substring(5);
-    } else if (arg.startsWith('-c:')) {
-      cppFile = arg.substring(3);
-    } else if (arg.startsWith('-t:')) {
-      tsFile = arg.substring(3);
-    } else if (arg.startsWith('--hpp:')) {
-      hppFile = arg.substring(6);
-    } else if (arg.startsWith('-h:')) {
-      hppFile = arg.substring(3);
-    } else if (arg.startsWith('--mod:')) {
-      modFiles = getModuleSpecifier('--mod:', arg.substring(6));
-    } else if (arg.startsWith('--mod:')) {
-      modFiles = getModuleSpecifier('-m:', arg.substring(3));
+    if (arg.startsWith('--cpp:') || arg.startsWith('-c:')) {
+      cppFile = arg.substring(arg.indexOf(':') + 1);
+    } else if (arg.startsWith('--ts:') || arg.startsWith('-t:')) {
+      tsFile = arg.substring(arg.indexOf(':') + 1);
+    } else if (arg.startsWith('--hpp:') || arg.startsWith('-h:')) {
+      hppFile = arg.substring(arg.indexOf(':') + 1);
+    } else if (arg.startsWith('--mod:') || arg.startsWith('--m:')) {
+      modFiles = getModuleSpecifier(arg, arg.substring(arg.indexOf(':') + 1));
     } else if (i + 1 < args.length) {
       if (arg === '--cpp' || arg === '-c') {
         cppFile = args[++i];
@@ -109,14 +108,26 @@ export async function main(input: string, ...args: string[]): Promise<void> {
       process.exit(1);
     }
   }
-  if (!cppFile || !tsFile) {
+  if (!(cppFile || modFiles) || !tsFile) {
     err('Missing an output file');
+    process.exit(1);
+  }
+  if (cppFile && modFiles) {
+    err('Cannot specify both C++ header output and module output');
     process.exit(1);
   }
   if (cppFile) {
     // Generate C++ code
     const CppGen = GetCppGenerator(hppFile ? { header: hppFile } : undefined);
     await CppGen.file(input, cppFile, ttg);
+  }
+  if (modFiles) {
+    const CppGen = GetCppGenerator(
+      modFiles.length === 1
+        ? { module: modFiles[0] }
+        : { module: modFiles[0], commonModule: modFiles[1] },
+    );
+    await CppGen.file(input, modFiles[0], ttg);
   }
   if (tsFile) {
     // Generate TypeScript code
