@@ -22,9 +22,12 @@ class Library(NamedTuple):
 
 
 libraries = [
-    Library("crowcpp-crow", "1.2.0", CMakeInfo("Crow", "Crow::Crow")),
-    Library("gtest", "1.16.0", CMakeInfo("GTest", "gtest::gtest")),   
+    Library("crowcpp-crow", "1.3.1", CMakeInfo("Crow", "Crow::Crow")),
+    Library("gtest", "1.17.0", CMakeInfo("GTest", "gtest::gtest")),
 ]
+
+# I don't think I want anything other than just the pair for these
+tools = [] # [Library("doxygen", "1.14.0")]
 
 class CrowIDLTestRecipe(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
@@ -42,7 +45,10 @@ class CrowIDLTestRecipe(ConanFile):
               var_name = library.info.var if library.info.var else f'{library.info.package.upper()}_LIB'
               imports.append(f'set({var_name} {library.info.target})\n')
               imports.append('\n')
-        file_location = os.path.join(self.recipe_folder, "ConanLibImports.cmake")
+        file_location = os.path.join(self.recipe_folder, "config", "ConanLibImports.cmake")
+        # Remove newlines from the end of the output:
+        while imports and imports[-1] == '\n':
+            imports.pop()
         if os.path.exists(file_location):
             # Check to see if the file is the same as what we're about to write, so we don't
             # unnecessarily trigger a camke reconfig
@@ -55,12 +61,16 @@ class CrowIDLTestRecipe(ConanFile):
                 else:
                     # File is the same, so don't write it out
                     return
-        with open(os.path.join(self.recipe_folder, "ConanLibImports.cmake"), "w", newline='\n') as f:
+        with open(os.path.join(self.recipe_folder, "config", "ConanLibImports.cmake"), "w", newline='\n') as f:
             f.writelines(imports)
-                
+
     def requirements(self):
         for requirement in libraries:
-            self.requires(requirement.name+"/"+requirement.version)
+            self.requires(requirement.name + "/" + requirement.version)
 
+    def build_requirements(self):
+        # Add the cmake toolchain as a build requirement
+        for requirement in tools:
+          self.tool_requires(requirement.name + "/" + requirement.version)
     def layout(self):
         vs_layout(self)

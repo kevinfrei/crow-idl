@@ -6,4 +6,3 @@ set(CROW_LIB Crow::Crow)
 
 find_package(GTest REQUIRED)
 set(GTEST_LIB gtest::gtest)
-
