@@ -68,6 +68,9 @@ function setAdditionalOptions(opts: Record<string, string>): void {
   if (opts.module) {
     isHdr = false;
   }
+  if (opts.commonModule) {
+    setHeader(opts.commonModule);
+  }
 }
 
 const headers: Set<string> = new Set([
@@ -177,6 +180,9 @@ function generateFooter(): string[] {
   const res = ['', `} // namespace ${namespace}`];
   res.push(...outsideNamespace);
   res.push('');
+  if (!isHdr) {
+    res.push('} // end export');
+  }
   return res;
 }
 
