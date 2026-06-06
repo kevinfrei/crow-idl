@@ -10,27 +10,26 @@ add_executable(js_cpp_xproc xproc_test.cpp)
 target_include_directories(js_cpp_xproc PRIVATE .. ../../build)
 target_link_libraries(js_cpp_xproc PUBLIC ${CROW_LIB})
 
-add_executable(idl_module_testing)
-target_sources(idl_module_testing PRIVATE json_test_module.cpp)
+add_library(ipc_modules)
 target_sources(
-  idl_module_testing
-  PRIVATE
+  ipc_modules
+  PUBLIC
   FILE_SET
   CXX_MODULES
   FILES
     gen.cppm common.cppm
 )
-target_link_libraries(idl_module_testing PUBLIC ${CROW_LIB} ${GTEST_LIB})
+target_link_libraries(ipc_modules PUBLIC ${CROW_LIB})
+
+add_executable(idl_module_testing)
+target_sources(idl_module_testing PRIVATE json_test_module.cpp)
+target_link_libraries(
+  idl_module_testing
+  PUBLIC
+    ipc_modules ${CROW_LIB} ${GTEST_LIB}
+)
 gtest_discover_tests(idl_module_testing)
 
 add_executable(js_cpp_xproc_module)
 target_sources(js_cpp_xproc_module PRIVATE xproc_test_module.cpp)
-target_sources(
-  js_cpp_xproc_module
-  PRIVATE
-  FILE_SET
-  CXX_MODULES
-  FILES
-    gen.cppm common.cppm
-)
-target_link_libraries(js_cpp_xproc_module PUBLIC ${CROW_LIB})
+target_link_libraries(js_cpp_xproc_module PUBLIC ipc_modules ${CROW_LIB})
