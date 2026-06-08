@@ -3,12 +3,13 @@ import { chkRecordOf, isString, isUndefined } from '@freik/typechk';
 import { pathToFileURL } from 'node:url';
 import { GetCppGenerator } from './crow-idl/emitters/cpp';
 import { GetTypescriptGenerator } from './crow-idl/emitters/typescript';
+import { FilterTypes } from './crow-idl/filter';
 import { isTypes } from './crow-idl/typechecks';
 
 function err(message: string): void {
   console.error(`Error: ${message}`);
   console.error(`Usage:
-  bun scripts/gen.ts <definitions.ts> <output specifiers>
+  bun scripts/gen.ts <definitions.ts> <output specifiers> <filters>
     
     * "definitions.ts" must contain a SymbolList export called TypesToGenerate.
 
@@ -32,6 +33,13 @@ function err(message: string): void {
           header file. If you specify a separate common header, it will be
           emitted there instead, and the generated cpp header will #include
           it.
+    * filters
+        --skip-prefix:<string>
+            (or -p:<string>)
+          This will skip any field, enum element, or type that begins with
+          <string>. I use this to make merging an updated framework via Git
+          cleaner, by having fields that mark the end of 'framework' edits,
+          which allows merges to be easier with fewer conflicts.
 `);
 }
 
@@ -66,19 +74,13 @@ export async function main(input: string, ...args: string[]): Promise<void> {
   const theFile = pathToFileURL(input).toString();
   console.log('Importing definitions from', theFile);
   const defsFile = await import(theFile);
-  for (const i in defsFile) {
-    console.log(`Loaded ${i}`);
-  }
-  const ttg = defsFile['TypesToGenerate'];
-  if (!chkRecordOf(isString, isTypes)(ttg)) {
-    err(`Input file ${input} must export a "TypesToGenerate" SymbolList.`);
-    process.exit(1);
-  }
+
   // A script to generate C++ code from the SharedConstants.ts file
   let cppFile: string | undefined;
   let tsFile: string | undefined;
   let hppFile: string | undefined;
   let modFiles: [string] | [string, string] | undefined;
+  const filters: string[] = [];
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
@@ -93,6 +95,8 @@ export async function main(input: string, ...args: string[]): Promise<void> {
       hppFile = arg.substring(arg.indexOf(':') + 1);
     } else if (arg.startsWith('--mod:') || arg.startsWith('--m:')) {
       modFiles = getModuleSpecifier(arg, arg.substring(arg.indexOf(':') + 1));
+    } else if (arg.startsWith('--skip-prefix:') || arg.startsWith('-p:')) {
+      filters.push(arg.substring(arg.indexOf(':') + 1));
     } else if (i + 1 < args.length) {
       if (arg === '--cpp' || arg === '-c') {
         cppFile = args[++i];
@@ -102,6 +106,11 @@ export async function main(input: string, ...args: string[]): Promise<void> {
         hppFile = args[++i];
       } else if (arg === '--mod' || arg === '-m') {
         modFiles = getModuleSpecifier(arg, args[++i]);
+      } else if (arg === '--skip-prefix' || arg === '-p') {
+        filters.push(args[++i]!);
+      } else {
+        err(`Unknown argumet: ${arg}`);
+        process.exit(1);
       }
     } else {
       err(`Unknown argument: ${arg}`);
@@ -116,10 +125,18 @@ export async function main(input: string, ...args: string[]): Promise<void> {
     err('Cannot specify both C++ header output and module output');
     process.exit(1);
   }
+
+  const ttg = defsFile['TypesToGenerate'];
+  if (!chkRecordOf(isString, isTypes)(ttg)) {
+    err(`Input file ${input} must export a "TypesToGenerate" SymbolList.`);
+    process.exit(1);
+  }
+
+  const filteredTTG = FilterTypes(ttg, filters);
   if (cppFile) {
     // Generate C++ code
     const CppGen = GetCppGenerator(hppFile ? { header: hppFile } : undefined);
-    await CppGen.file(input, cppFile, ttg);
+    await CppGen.file(input, cppFile, filteredTTG);
   }
   if (modFiles) {
     // Generate C++ module code
@@ -128,12 +145,12 @@ export async function main(input: string, ...args: string[]): Promise<void> {
         ? { module: modFiles[0] }
         : { module: modFiles[0], commonModule: modFiles[1] },
     );
-    await CppGen.file(input, modFiles[0], ttg);
+    await CppGen.file(input, modFiles[0], filteredTTG);
   }
   if (tsFile) {
     // Generate TypeScript code
     const TypescriptGen = GetTypescriptGenerator();
-    await TypescriptGen.file(input, tsFile, ttg);
+    await TypescriptGen.file(input, tsFile, filteredTTG);
   }
 }
 
